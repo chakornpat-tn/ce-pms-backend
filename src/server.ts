@@ -11,7 +11,7 @@ export const startServer = async () => {
       console.log(`app listening on port ${process.env.PORT}`)
     })
   } catch (error) {
-    console.log('MongoDB connection error.', error)
+    console.log('MongoDB connection error :', (error as Error).message)
   }
 }
 
