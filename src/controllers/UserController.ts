@@ -8,11 +8,15 @@ const salt = bcrypt.genSaltSync(saltRounds)
 
 export const ListUsers = async (req: Request, res: Response) => {
   try {
-    const page: number = parseInt(req.query.page as string) || 1
-    const perPage: number = parseInt(req.query.perPage as string) || 20
+    let page: number = parseInt(req.query.page as string)
+    let perPage: number = parseInt(req.query.perPage as string)
+    const role: number = parseInt(req.query.role as string)
     const { name, username } = req.query
 
     let filter: any = {}
+
+    if (perPage <= 0) perPage = 30
+    if (page <= 0) page = 1
     if (name) {
       filter.name = { $regex: new RegExp(name as string, 'i') }
     }
@@ -21,11 +25,19 @@ export const ListUsers = async (req: Request, res: Response) => {
       filter.username = { $regex: new RegExp(username as string, 'i') }
     }
 
+    if (role && !isNaN(Number(role))) {
+      filter.role = Number(role)
+    }
+
+    const totalResult = await User.countDocuments(filter)
+
     const users = await User.find(filter)
       .skip((page - 1) * perPage)
       .limit(perPage)
+      .sort('role')
       .exec()
-    res.json(users)
+
+    res.json({ totalResult, users })
   } catch (error) {
     res.status(500).json({ message: (error as Error).message })
   }
