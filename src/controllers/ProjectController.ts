@@ -1,10 +1,36 @@
 import { Request, Response } from 'express'
 import { generateUsername } from '../utils/helper/generateUsername'
 import { decrypt } from '../utils/JWT/jwt'
-import Project from '../models/Project'
+import * as projectRepo from '../repositories/v1/ProjectRepository'
 
-export const ListProjects = (req: Request, res: Response) => {
-  res.json({ message: 'List Projects' })
+export const ListProjects = async (req: Request, res: Response) => {
+  try {
+    const { academicYear, semester, title, documentStatus, projectStatus } =
+      req.query
+
+    const filter: projectRepo.ListProjectsFilter = {
+      ...(academicYear && { academicYear: Number(academicYear) }),
+      ...(semester && { semester: Number(semester) }),
+      ...(title && { title: String(title) }),
+    }
+
+    const statusFilter: { [key: string]: string } = {}
+    if (documentStatus)
+      statusFilter['status.documentStatus'] = String(documentStatus)
+    if (projectStatus)
+      statusFilter['status.projectStatus'] = String(projectStatus)
+
+    if (Object.keys(statusFilter).length > 0) {
+      Object.assign(filter, statusFilter)
+    }
+
+    const projects = await projectRepo.ListProjects(filter)
+
+    return res.status(200).json(projects)
+  } catch (error) {
+    console.error('Error:', (error as Error).message)
+    res.status(500).json({ message: (error as Error).message })
+  }
 }
 
 export const FindProjectByID = (req: Request, res: Response) => {
@@ -44,15 +70,10 @@ export const CreateProject = async (req: Request, res: Response) => {
       updateBy: tokenData.name,
     }
 
-    const project = new Project({
-      ...projectData,
-    })
+    // Save project to database
+    const project = await projectRepo.CreateProject(projectData)
 
-    await project.save()
-
-    res
-      .status(201)
-      .json({ message: 'created project successfully : ' + project.title })
+    res.status(200).json(project.title)
   } catch (error) {
     res.json({ message: (error as Error).message })
   }
