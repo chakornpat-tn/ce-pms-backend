@@ -4,13 +4,16 @@ import AuthRoutes from '../routes/AuthRoutes'
 import ProjectRoutes from '../routes/ProjectRoutes'
 
 const router = express.Router()
+const v1Router = express.Router()
 
 router.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Hello!!! Welcome to CE-PMS API' })
 })
 
-router.use('/user', UserRoutes)
-router.use('/auth', AuthRoutes)
-router.use('/project', ProjectRoutes)
+v1Router.use('/user', UserRoutes)
+v1Router.use('/auth', AuthRoutes)
+v1Router.use('/project', ProjectRoutes)
+
+router.use('/v1', v1Router)
 
 export default router
