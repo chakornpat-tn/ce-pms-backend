@@ -143,4 +143,5 @@ dist
 
 docker-compose.yml
 mongodb_db/
+mongodb_db2/
 # End of https://www.toptal.com/developers/gitignore/api/node
