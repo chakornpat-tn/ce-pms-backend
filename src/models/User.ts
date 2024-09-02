@@ -15,3 +15,14 @@ const schema = new Mongoose.Schema(
 )
 
 export default Mongoose.model('User', schema)
+
+export interface User {
+  name: string
+  username: string
+  password: string
+  role: number
+}
+
+export interface AdvisorRequest {
+  id: string 
+}

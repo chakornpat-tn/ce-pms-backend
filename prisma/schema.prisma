@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String?
+  username   String    @unique
+  password   String
+  role       Int       @default(3)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Projects   Projects? @relation(fields: [projectsId], references: [id])
+  projectsId String?   @db.ObjectId
+}
+
+model Projects {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  username       String  @unique
+  password       String?
+  projectName    String
+  projectNameEng String?
+  abstract       String?
+  abstractEnd    String?
+  detail         String?
+  detailEnd      String?
+  semester       Int     @default(1)
+  academicYear   Int
+  type           String?
+
+  projectStatus ProjectStatus? @relation(fields: [projectStatusId], references: [id])
+
+  developers Developers[]
+  advisors   Users[]
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  projectStatusId String? @db.ObjectId
+}
+
+model Developers {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  studentID  Int       @unique
+  name       String
+  Projects   Projects? @relation(fields: [projectsId], references: [id])
+  projectsId String?   @db.ObjectId
+}
+
+model ProjectStatus {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  statusName String
+  isActive   Boolean    @default(true)
+  Projects   Projects[]
+}

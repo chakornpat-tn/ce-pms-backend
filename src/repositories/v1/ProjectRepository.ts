@@ -24,3 +24,9 @@ export const ListProjects = async (filter: ListProjectsFilter = {}) => {
     .exec()
   return projects
 }
+
+const useProjectRepository = async () => {
+
+  
+  return {}
+}

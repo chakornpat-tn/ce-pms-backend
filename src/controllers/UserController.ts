@@ -1,34 +1,32 @@
 import { Request, Response } from 'express'
-import * as UserRepo from '../repositories/v1/UserRepository'
+import useUserRepository from '../repositories/v1/UserRepository'
+import userRoles from '../statics/constants/userRoles/userRoles'
 import { Error } from 'mongoose'
+import bcrypt from 'bcrypt'
+
+const saltRounds = Number(process.env.SALT_ROUNDS)
+const userRepo = useUserRepository()
 
 export const ListUsers = async (req: Request, res: Response) => {
   try {
-    let page: number = parseInt(req.query.page as string)
-    let perPage: number = parseInt(req.query.perPage as string)
-    const role: number = parseInt(req.query.role as string)
-    const { name, username } = req.query
+    const page: number = Math.max(parseInt(req.query.page as string) || 1, 1)
+    const perPage: number = Math.max(
+      parseInt(req.query.perPage as string) || 30,
+      1
+    )
+    const role: number | undefined = req.query.role
+      ? parseInt(req.query.role as string)
+      : undefined
+    const search: string | undefined = req.query.search as string
 
-    let filter: any = {}
+    const { totalCount, users } = await userRepo.GetUsers(
+      page,
+      perPage,
+      search,
+      role
+    )
 
-    if (perPage <= 0) perPage = 30
-    if (page <= 0) page = 1
-    if (name) {
-      filter.name = { $regex: new RegExp(name as string, 'i') }
-    }
-
-    if (username) {
-      filter.username = { $regex: new RegExp(username as string, 'i') }
-    }
-
-    if (role && !isNaN(Number(role))) {
-      filter.role = Number(role)
-    }
-
-    const totalResult = await UserRepo.CountUsers(filter)
-    const users = await UserRepo.GetUsers(filter, page, perPage)
-
-    res.json({ totalResult, users })
+    res.json({ totalCount, users })
   } catch (error) {
     res.status(500).json({ message: (error as Error).message })
   }
@@ -37,7 +35,7 @@ export const ListUsers = async (req: Request, res: Response) => {
 export const FindUserByID = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const user = await UserRepo.FindUserById(id)
+    const user = await userRepo.FindUserByID(id)
     if (user) {
       res.json(user)
     } else {
@@ -51,7 +49,7 @@ export const FindUserByID = async (req: Request, res: Response) => {
 export const DeleteUserByID = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const user = await UserRepo.DeleteUserById(id)
+    const user = await userRepo.DeleteUserByID(id)
     if (user) {
       res.status(200)
     } else {
@@ -68,8 +66,11 @@ export const UpdateUser = async (req: Request, res: Response) => {
     const user = req.body
 
     if (user.username) throw new Error(`cannot change username`)
+    if (user.password) {
+      user.password = await bcrypt.hashSync(user.password, saltRounds)
+    }
 
-    const result = await UserRepo.UpdateUserById(id, user)
+    const result = await userRepo.UpdateUserByID(id, user)
 
     res.json({ message: 'Updated user: ' + result?.name })
   } catch (error) {
@@ -80,7 +81,16 @@ export const UpdateUser = async (req: Request, res: Response) => {
 export const CreateUser = async (req: Request, res: Response) => {
   try {
     const userData = req.body
-    const user = await UserRepo.CreateUser(userData)
+
+    if (!userData.password) {
+      throw new Error('Password is required')
+    }
+
+    if (!userData.role) userData.role = userRoles.Teacher
+
+    const passwordHash = await bcrypt.hash(userData.password, saltRounds)
+    userData.password = passwordHash
+    const user = await userRepo.CreateUser(userData)
 
     res
       .status(200)
