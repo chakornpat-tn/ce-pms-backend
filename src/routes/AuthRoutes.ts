@@ -1,9 +1,10 @@
 import express from 'express'
-import * as AuthController from '../controllers/AuthController'
+import useAuthController from '../controllers/AuthController'
 
 const router = express.Router()
+const authController = useAuthController()
 
-router.post('/login', AuthController.Login)
-router.post('/login/user', AuthController.ProjectUserLogin)
+router.post('/login', authController.Login)
+// router.post('/login/user', AuthController.ProjectUserLogin)
 
 export = router
