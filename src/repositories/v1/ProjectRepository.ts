@@ -1,4 +1,4 @@
-import Project from '../../models/Project'
+import Project,{Projects} from '../../models/Project'
 
 export interface ListProjectsFilter {
   academicYear?: number
@@ -18,9 +18,23 @@ export const CreateProject = async (projectData: any) => {
   return await project.save()
 }
 
-export const ListProjects = async (filter: ListProjectsFilter = {}) => {
-  const projects = await Project.find(filter)
-    .select('-username -password')
-    .exec()
-  return projects
+// export const ListProjects = async (filter: ListProjectsFilter = {}) => {
+//   const projects = await Project.find(filter)
+//     .select('-username -password')
+//     .exec()
+//   return projects
+// }
+
+const useProjectRepository = async () => {
+  const CreateProject = async (projectData: Projects) => {
+    
+  }
+
+  const UpdateProject = async (projectData: Projects) => {
+    
+  }
+
+
+  
+  return {}
 }

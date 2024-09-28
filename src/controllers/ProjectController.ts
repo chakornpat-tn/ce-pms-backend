@@ -24,9 +24,9 @@ export const ListProjects = async (req: Request, res: Response) => {
       Object.assign(filter, statusFilter)
     }
 
-    const projects = await projectRepo.ListProjects(filter)
+    // const projects = await projectRepo.ListProjects(filter)
 
-    return res.status(200).json(projects)
+    return res.status(200).json()
   } catch (error) {
     console.error('Error:', (error as Error).message)
     res.status(500).json({ message: (error as Error).message })

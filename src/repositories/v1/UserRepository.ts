@@ -1,54 +1,147 @@
-import User from '../../models/User'
-import bcrypt from 'bcrypt'
+import { PrismaClient } from '@prisma/client'
 
-const saltRounds = Number(process.env.SALT_ROUNDS)
+const prisma = new PrismaClient()
 
-export const GetUsers = async (filter: any, page: number, perPage: number) => {
-  const users = await User.find(filter)
-    .skip((page - 1) * perPage)
-    .limit(perPage)
-    .sort('role')
-    .exec()
-
-  return users
+const userSelect = {
+  id: true,
+  name: true,
+  username: true,
+  role: true,
+  createdAt: true,
+  updatedAt: true,
 }
 
-export const CountUsers = async (filter: any) => {
-  const totalResult = await User.countDocuments(filter)
-  return totalResult
+const CountUsers = async (search?: string, roleFilter?: number) => {
+  const totalCount = await prisma.user.count({
+    where: {
+      AND: [
+        {
+          OR: [
+            search
+              ? {
+                  name: {
+                    contains: search,
+                    mode: 'insensitive',
+                  },
+                }
+              : {},
+            search
+              ? {
+                  username: {
+                    contains: search,
+                    mode: 'insensitive',
+                  },
+                }
+              : {},
+          ],
+        },
+        roleFilter !== undefined
+          ? {
+              role: roleFilter,
+            }
+          : {},
+      ],
+    },
+  })
+
+  return totalCount
 }
 
-export const FindUserById = async (id: string) => {
-  const user = await User.findById(id)
-  return user
-}
+export const useUserRepository = () => {
+  const GetUsers = async (
+    page: number,
+    perPage: number,
+    search?: string,
+    roleFilter?: number
+  ) => {
+    const totalCount = await CountUsers(search, roleFilter)
 
-export const DeleteUserById = async (id: string) => {
-  const user = await User.findByIdAndDelete(id)
-  return user
-}
+    const users = await prisma.user.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              search
+                ? {
+                    name: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  }
+                : {},
+              search
+                ? {
+                    username: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
+                  }
+                : {},
+            ],
+          },
+          roleFilter !== undefined
+            ? {
+                role: roleFilter,
+              }
+            : {},
+        ],
+      },
+      skip: (page - 1) * perPage,
+      take: perPage,
+      orderBy: {
+        role: 'desc',
+      },
+      select: userSelect,
+    })
 
-export const UpdateUserById = async (id: string, userData: any) => {
-  if (userData.password) {
-    userData.password = await bcrypt.hashSync(userData.password, saltRounds)
+    return { totalCount, users }
+  }
+  const FindUserByID = async (id: number) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      select: userSelect,
+    })
+    return user
   }
 
-  const updatedData = [{ _id: id }, { ...userData }, { new: true }]
-  const result = await User.findOneAndUpdate(...updatedData)
-
-  return result
-}
-
-export const CreateUser = async (userData: any) => {
-  if (!userData.password) {
-    throw new Error('Password is required')
+  const DeleteUserByID = async (id: number) => {
+    const user = await prisma.user.delete({
+      where: {
+        id: id,
+      },
+    })
+    return user
   }
 
-  const passwordHash = await bcrypt.hashSync(userData.password, saltRounds)
-  userData.password = passwordHash
+  const UpdateUserByID = async (id: number, userData: any) => {
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: userData,
+    })
 
-  const user = new User({ ...userData })
-  await user.save()
+    return updatedUser
+  }
 
-  return user
+  const CreateUser = async (userData: any) => {
+    const user = await prisma.user.create({
+      data: {
+        ...userData,
+      },
+    })
+    return user
+  }
+
+  return {
+    GetUsers,
+    FindUserByID,
+    DeleteUserByID,
+    UpdateUserByID,
+    CreateUser,
+  }
 }
+
+export default useUserRepository

@@ -1,4 +1,6 @@
 import Mongoose, { Schema } from 'mongoose'
+import { AdvisorRequest } from './User'
+import { DeveloperRequest } from './Developer'
 
 const projectStatusSchema: Schema<StatusTypes> = new Schema(
   {
@@ -77,3 +79,34 @@ type IPreProjectStatus = {
 }
 
 export default Mongoose.model('Project', schema)
+
+export interface Projects {
+  username: string
+  password?: string
+  projectName: string
+  projectNameEng?: string
+  abstract?: string
+  abstractEng?: string
+  detail?: string
+  detailEng?: string
+  semester: number
+  academicYear: number
+  type: string
+}
+
+export interface CreateProjectRequest {
+  username: string
+  password?: string
+  projectName: string
+  projectNameEng?: string
+  abstract?: string
+  abstractEnd?: string
+  detail?: string
+  detailEnd?: string
+  semester?: number
+  academicYear: number
+  type?: string
+  projectStatusId?: string
+  developers: DeveloperRequest[]
+  advisors: AdvisorRequest[]
+}

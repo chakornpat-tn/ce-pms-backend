@@ -143,4 +143,9 @@ dist
 
 docker-compose.yml
 mongodb_db/
+
+
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# Prisma migrations
+prisma/migrations/

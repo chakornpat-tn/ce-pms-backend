@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String?
+  username String  @unique
+  password String
+  role     Int     @default(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  proejects   ProjectStudent[]
+  ProjectUser ProjectUser[]
+}
+
+model Project {
+  id             Int     @id @default(autoincrement())
+  username       String  @unique
+  password       String?
+  projectName    String
+  projectNameEng String?
+  abstract       String?
+  abstractEnd    String?
+  detail         String?
+  detailEnd      String?
+  semester       Int     @default(1)
+  academicYear   Int
+  type           String?
+
+  projectStatusID Int
+  proejctStatus   ProjectStatus @relation(fields: [projectStatusID], references: [id])
+
+  students ProjectStudent[]
+  users    ProjectUser[]
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model Student {
+  id        Int      @id @default(autoincrement())
+  studentID String   @unique
+  name      String
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  proejects ProjectStudent[]
+}
+
+model ProjectStatus {
+  id        Int     @id @default(autoincrement())
+  name      String
+  subject   Int     @default(1)
+  textColor String
+  bgColor   String
+  isActive  Boolean @default(true)
+
+  Projects Project[]
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+model ProjectStudent {
+  Project   Project? @relation(fields: [projectID], references: [id])
+  projectID Int
+
+  Student   Student? @relation(fields: [studentID], references: [id])
+  studentID Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+
+  @@id([projectID, studentID])
+}
+
+model ProjectUser {
+  Project   Project? @relation(fields: [projectID], references: [id])
+  projectID Int
+
+  User   User? @relation(fields: [userID], references: [id])
+  userID Int
+
+  @@id([projectID, userID])
+}
