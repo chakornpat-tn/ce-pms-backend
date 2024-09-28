@@ -34,9 +34,9 @@ model Project {
   projectName    String
   projectNameEng String?
   abstract       String?
-  abstractEnd    String?
+  abstractEng    String?
   detail         String?
-  detailEnd      String?
+  detailEng      String?
   semester       Int     @default(1)
   academicYear   Int
   type           String?
