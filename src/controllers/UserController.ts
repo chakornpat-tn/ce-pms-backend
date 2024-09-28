@@ -34,21 +34,21 @@ export const ListUsers = async (req: Request, res: Response) => {
 
 export const FindUserByID = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params
+    const id = parseInt(req.params.id, 10)
     const user = await userRepo.FindUserByID(id)
     if (user) {
       res.json(user)
     } else {
-      res.status(404)
+      res.status(404).json({ message: "User not found" })
     }
   } catch (error) {
-    res.status(500).json({ message: (error as Error).message })
+    console.warn("Error:", (error as Error).message)
+    res.status(500).json({ message: "Find user error" })
   }
 }
-
 export const DeleteUserByID = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params
+    const id = parseInt(req.params.id, 10)
     const user = await userRepo.DeleteUserByID(id)
     if (user) {
       res.status(200)
@@ -62,7 +62,7 @@ export const DeleteUserByID = async (req: Request, res: Response) => {
 
 export const UpdateUser = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params
+    const id = parseInt(req.params.id, 10)
     const user = req.body
 
     if (user.username) throw new Error(`cannot change username`)
@@ -77,7 +77,6 @@ export const UpdateUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: (error as Error).message })
   }
 }
-
 export const CreateUser = async (req: Request, res: Response) => {
   try {
     const userData = req.body

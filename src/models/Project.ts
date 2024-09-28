@@ -80,7 +80,7 @@ type IPreProjectStatus = {
 
 export default Mongoose.model('Project', schema)
 
-interface Project {
+export interface Projects {
   username: string
   password?: string
   projectName: string
@@ -94,7 +94,7 @@ interface Project {
   type: string
 }
 
-interface CreateProjectRequest {
+export interface CreateProjectRequest {
   username: string
   password?: string
   projectName: string

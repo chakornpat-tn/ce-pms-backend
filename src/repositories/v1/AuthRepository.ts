@@ -23,7 +23,7 @@ const FindProjectByUsername = async (username: string) => {
 }
 export const useAuthRepository = () => {
   const FindUserByUsername = async (username: string) => {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         username,
       },

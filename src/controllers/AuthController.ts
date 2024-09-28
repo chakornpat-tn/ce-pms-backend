@@ -27,7 +27,7 @@ const useAuthController = () => {
         return res.status(500).json({ error: 'TOKEN_SECRET is not defined' })
       }
 
-      const payload = result
+      const { password: _, ...payload } = result
 
       const token = await encrypt(payload)
 
@@ -41,7 +41,6 @@ const useAuthController = () => {
         .json({ message: 'login failed wrong username or password' })
     }
   }
-
   return {
     Login,
   }

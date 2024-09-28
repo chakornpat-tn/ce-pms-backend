@@ -8,11 +8,11 @@ const userSelect = {
   username: true,
   role: true,
   createdAt: true,
-  projectsId: false,
+  updatedAt: true,
 }
 
 const CountUsers = async (search?: string, roleFilter?: number) => {
-  const totalCount = await prisma.users.count({
+  const totalCount = await prisma.user.count({
     where: {
       AND: [
         {
@@ -56,7 +56,7 @@ export const useUserRepository = () => {
   ) => {
     const totalCount = await CountUsers(search, roleFilter)
 
-    const users = await prisma.users.findMany({
+    const users = await prisma.user.findMany({
       where: {
         AND: [
           {
@@ -96,8 +96,8 @@ export const useUserRepository = () => {
 
     return { totalCount, users }
   }
-  const FindUserByID = async (id: string) => {
-    const user = await prisma.users.findUnique({
+  const FindUserByID = async (id: number) => {
+    const user = await prisma.user.findUnique({
       where: {
         id: id,
       },
@@ -106,8 +106,8 @@ export const useUserRepository = () => {
     return user
   }
 
-  const DeleteUserByID = async (id: string) => {
-    const user = await prisma.users.delete({
+  const DeleteUserByID = async (id: number) => {
+    const user = await prisma.user.delete({
       where: {
         id: id,
       },
@@ -115,8 +115,8 @@ export const useUserRepository = () => {
     return user
   }
 
-  const UpdateUserByID = async (id: string, userData: any) => {
-    const updatedUser = await prisma.users.update({
+  const UpdateUserByID = async (id: number, userData: any) => {
+    const updatedUser = await prisma.user.update({
       where: {
         id: id,
       },
@@ -127,7 +127,7 @@ export const useUserRepository = () => {
   }
 
   const CreateUser = async (userData: any) => {
-    const user = await prisma.users.create({
+    const user = await prisma.user.create({
       data: {
         ...userData,
       },
