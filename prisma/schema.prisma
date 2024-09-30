@@ -12,90 +12,96 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+  model User {
+    id       Int     @id @default(autoincrement()) @map("id")
+    name     String? @map("name")
+    username String  @unique @map("username")
+    password String  @map("password")
+    role     Int     @default(3) @map("role")
 
-model User {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  username String  @unique
-  password String
-  role     Int     @default(3)
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    projectUser ProjectUser[]
 
-  proejects   ProjectStudent[]
-  ProjectUser ProjectUser[]
-}
+    @@map("users")
+  }
 
-model Project {
-  id             Int     @id @default(autoincrement())
-  username       String  @unique
-  password       String?
-  projectName    String
-  projectNameEng String?
-  abstract       String?
-  abstractEng    String?
-  detail         String?
-  detailEng      String?
-  semester       Int     @default(1)
-  academicYear   Int
-  type           String?
+  model Project {
+    id             Int     @id @default(autoincrement()) @map("id")
+    username       String  @unique @map("username")
+    password       String? @map("password")
+    projectName    String  @map("project_name")
+    projectNameEng String? @map("project_name_eng")
+    abstract       String? @map("abstract")
+    abstractEng    String? @map("abstract_eng")
+    detail         String? @map("detail")
+    detailEng      String? @map("detail_eng")
+    semester       Int     @default(1) @map("semester")
+    academicYear   Int     @map("academic_year")
+    type           String? @map("type")
 
-  projectStatusID Int
-  proejctStatus   ProjectStatus @relation(fields: [projectStatusID], references: [id])
+    projectStatusId Int           @map("project_status_id")
+    proejctStatus   ProjectStatus @relation(fields: [projectStatusId], references: [id])
 
-  students ProjectStudent[]
-  users    ProjectUser[]
+    students ProjectStudent[]
+    users    ProjectUser[]
 
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-}
+    createAt DateTime @default(now()) @map("create_at")
+    updateAt DateTime @updatedAt @map("update_at")
 
-model Student {
-  id        Int      @id @default(autoincrement())
-  studentID String   @unique
-  name      String
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
+    @@map("projects")
+  }
 
-  proejects ProjectStudent[]
-}
+  model Student {
+    id        Int      @id @default(autoincrement()) @map("id")
+    studentId String   @unique @map("student_id")
+    name      String   @map("name")
+    createAt  DateTime @default(now()) @map("create_at")
+    updateAt  DateTime @updatedAt @map("update_at")
 
-model ProjectStatus {
-  id        Int     @id @default(autoincrement())
-  name      String
-  subject   Int     @default(1)
-  textColor String
-  bgColor   String
-  isActive  Boolean @default(true)
+    proejects ProjectStudent[]
 
-  Projects Project[]
+    @@map("students")
+  }
 
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-}
+  model ProjectStatus {
+    id        Int     @id @default(autoincrement()) @map("id")
+    name      String  @map("name")
+    subject   Int     @default(1) @map("subject")
+    textColor String  @map("text_color")
+    bgColor   String  @map("bg_color")
+    isActive  Boolean @default(true) @map("is_active")
 
-model ProjectStudent {
-  Project   Project? @relation(fields: [projectID], references: [id])
-  projectID Int
+    projects Project[]
 
-  Student   Student? @relation(fields: [studentID], references: [id])
-  studentID Int
+    createAt DateTime @default(now()) @map("create_at")
+    updateAt DateTime @updatedAt @map("update_at")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    Int?
+    @@map("project_statuses")
+  }
 
-  @@id([projectID, studentID])
-}
+  model ProjectStudent {
+    project   Project? @relation(fields: [projectId], references: [id])
+    projectId Int      @map("project_id")
 
-model ProjectUser {
-  Project   Project? @relation(fields: [projectID], references: [id])
-  projectID Int
+    student   Student? @relation(fields: [studentId], references: [id])
+    studentId Int      @map("student_id")
 
-  User   User? @relation(fields: [userID], references: [id])
-  userID Int
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@id([projectID, userID])
-}
+    @@id([projectId, studentId])
+    @@map("project_students")
+  }
+
+  model ProjectUser {
+    id        Int      @id @default(autoincrement()) @map("id")
+    project   Project? @relation(fields: [projectId], references: [id])
+    projectId Int      @map("project_id")
+
+    user   User? @relation(fields: [userId], references: [id])
+    userId Int   @map("user_id")
+
+    @@map("project_users")
+  }
