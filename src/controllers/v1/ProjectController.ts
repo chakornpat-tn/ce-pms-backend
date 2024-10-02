@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import { generateUsername } from '../utils/helper/generateUsername'
-import { decrypt } from '../utils/JWT/jwt'
-import * as projectRepo from '../repositories/v1/ProjectRepository'
+import { generateUsername } from '../../utils/helper/generateUsername'
+import { decrypt } from '../../utils/JWT/jwt'
+import * as projectRepo from '../../repositories/v1/ProjectRepository'
 
 export const ListProjects = async (req: Request, res: Response) => {
   try {

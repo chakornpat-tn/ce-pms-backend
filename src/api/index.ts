@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
-import UserRoutes from '../routes/UserRoutes'
-import AuthRoutes from '../routes/AuthRoutes'
-import ProjectRoutes from '../routes/ProjectRoutes'
+import UserRoutes from '@/routes/v1/UserRoutes'
+import AuthRoutes from '@/routes/v1/AuthRoutes'
+import ProjectRoutes from '@/routes/v1/ProjectRoutes'
 
 const router = express.Router()
 const v1Router = express.Router()
