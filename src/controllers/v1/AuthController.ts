@@ -1,9 +1,12 @@
 import { Request, Response } from 'express'
-import { encrypt } from '../utils/JWT/jwt'
+import { encrypt } from '../../utils/JWT/jwt'
 import bcrypt from 'bcrypt'
-import useAuthRepository from '../repositories/v1/AuthRepository'
+import useAuthRepository from '../../repositories/v1/AuthRepository'
+import utils from '@/utils/Response/response'
 
 const authRepo = useAuthRepository()
+
+const title = 'Auth Controller V1'
 
 const useAuthController = () => {
   const Login = async (req: Request, res: Response) => {
@@ -24,21 +27,23 @@ const useAuthController = () => {
 
       const secretKey = process.env.TOKEN_SECRET
       if (!secretKey) {
-        return res.status(500).json({ error: 'TOKEN_SECRET is not defined' })
+        return res
+          .status(500)
+          .json(utils.ErrorMessage(title, 'secret key not found'))
       }
 
       const { password: _, ...payload } = result
 
       const token = await encrypt(payload)
 
-      return res.status(200).json({
-        token: token,
-      })
+      return res
+        .status(200)
+        .json(utils.SuccessMessage(title, 'login successfully', { token }))
     } catch (error) {
       console.warn('useAuthController.Login error :', error)
       return res
         .status(401)
-        .json({ message: 'login failed wrong username or password' })
+        .json(utils.UnauthorizedMessage(title))
     }
   }
   return {
