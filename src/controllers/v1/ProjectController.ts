@@ -1,88 +1,172 @@
 import { Request, Response } from 'express'
-import { generateUsername } from '../../utils/helper/generateUsername'
-import { decrypt } from '../../utils/JWT/jwt'
-import * as projectRepo from '../../repositories/v1/ProjectRepository'
+import { CreateProjectRequest, ListProjectsFilter } from '@/models/Project'
+import useProjectRepository from '@/repositories/v1/ProjectRepository'
+import * as utils from '@/utils'
 
-export const ListProjects = async (req: Request, res: Response) => {
-  try {
-    const { academicYear, semester, title, documentStatus, projectStatus } =
-      req.query
+const title = 'Project Controller V1'
+const projectRepo = useProjectRepository()
 
-    const filter: projectRepo.ListProjectsFilter = {
-      ...(academicYear && { academicYear: Number(academicYear) }),
-      ...(semester && { semester: Number(semester) }),
-      ...(title && { title: String(title) }),
+const ProjectController = () => {
+  const CreateProject = async (req: Request, res: Response) => {
+    try {
+      const token = req.headers.authorization
+      const payload = await utils.GetTokenData(token)
+      if (!payload) throw new Error(`Invalid token`)
+
+      let formData: CreateProjectRequest = req.body
+      const filteredUsers = formData.users
+        ? formData.users.filter((userId) => userId !== payload.id)
+        : []
+      formData.users =
+        formData.users && formData.users.length > 0
+          ? [payload.id, filteredUsers[0]].slice(0, 2)
+          : [payload.id]
+      if (!formData.academicYear) {
+        formData.academicYear = new Date().getFullYear() + 543
+      }
+
+      if (!formData.semester) {
+        formData.semester = 1
+      }
+
+      formData.username = await utils.generateUsername()
+
+      await projectRepo.CreateProject(formData)
+
+      res.json(utils.SuccessMessage(title, 'Project created successfully'))
+    } catch (error) {
+      utils.logger.warn(
+        error as Error,
+        'ProjectController.CreateProject Error'
+      )
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to create project'))
     }
+  }
 
-    const statusFilter: { [key: string]: string } = {}
-    if (documentStatus)
-      statusFilter['status.documentStatus'] = String(documentStatus)
-    if (projectStatus)
-      statusFilter['status.projectStatus'] = String(projectStatus)
-
-    if (Object.keys(statusFilter).length > 0) {
-      Object.assign(filter, statusFilter)
+  const ListProjects = async (req: Request, res: Response) => {
+    try {
+      const filter: ListProjectsFilter = {
+        academicYear: Number(req.query.academicYear),
+        semester: Number(req.query.semester),
+        projectStatus: Number(req.query.projectStatus) || undefined,
+        projectName: (req.query.projectName as string) || undefined,
+      }
+      const projects = await projectRepo.ListProjects(filter)
+      res.json(
+        utils.SuccessMessage(title, 'Projects retrieved successfully', projects)
+      )
+    } catch (error) {
+      utils.logger.warn(
+        error as Error,
+        'ProjectController.ListProjects Error'
+      )
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to retrieve projects'))
     }
+  }
+  const GetProjectById = async (req: Request, res: Response) => {
+    try {
+      const projectId = parseInt(req.params.id)
+      const project = await projectRepo.GetProjectById(projectId)
+      if (!project) {
+        return res
+          .status(404)
+          .json(
+            utils.NotFoundMessage(
+              'Project not found',
+              'The requested project does not exist'
+            )
+          )
+      }
+      res.json(
+        utils.SuccessMessage(title, 'Project retrieved successfully', project)
+      )
+    } catch (error) {
+      utils.logger.warn(
+        error as Error,
+        'ProjectController.GetProjectById Error'
+      )
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to retrieve project'))
+    }
+  }
 
-    // const projects = await projectRepo.ListProjects(filter)
+  const UpdateProject = async (req: Request, res: Response) => {
+    try {
+      const projectId = parseInt(req.params.id)
+      const updateData = req.body
+      const updatedProject = await projectRepo.UpdateProject(updateData)
+      if (!updatedProject) {
+        return res
+          .status(404)
+          .json(
+            utils.NotFoundMessage(
+              'Project not found',
+              'The requested project does not exist'
+            )
+          )
+      }
+      res.json(
+        utils.SuccessMessage(
+          title,
+          'Project updated successfully',
+          updatedProject
+        )
+      )
+    } catch (error) {
+      utils.logger.warn(
+        error as Error,
+        'ProjectController.UpdateProject Error'
+      )
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to update project'))
+    }
+  }
 
-    return res.status(200).json()
-  } catch (error) {
-    console.error('Error:', (error as Error).message)
-    res.status(500).json({ message: (error as Error).message })
+  const DeleteProject = async (req: Request, res: Response) => {
+    try {
+      const projectId = parseInt(req.params.id)
+      const deletedProject = await projectRepo.DeleteProject(projectId)
+      if (!deletedProject) {
+        return res
+          .status(404)
+          .json(
+            utils.NotFoundMessage(
+              'Project not found',
+              'The requested project does not exist'
+            )
+          )
+      }
+      res.json(
+        utils.SuccessMessage(
+          title,
+          'Project deleted successfully',
+          deletedProject
+        )
+      )
+    } catch (error) {
+      utils.logger.warn(
+        error as Error,
+        'ProjectController.DeleteProject Error'
+      )
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to delete project'))
+    }
+  }
+
+  return {
+    CreateProject,
+    ListProjects,
+    GetProjectById,
+    UpdateProject,
+    DeleteProject,
   }
 }
 
-export const FindProjectByID = (req: Request, res: Response) => {
-  res.json({ message: 'Find Projects By ID' })
-}
-
-export const CreateProject = async (req: Request, res: Response) => {
-  try {
-    const token = req.cookies.token || undefined
-    if (token == undefined) throw new Error(`Invalid token`)
-
-    const formData = req.body
-    if (!formData.title) throw new Error(`Invalid title project name.`)
-    const title = formData.title
-    const username = await generateUsername()
-    const tokenData = (await decrypt(token)) as { id: string; name: string }
-    const developers = formData.developers
-    let advisors = [{ advisorId: tokenData.id, name: tokenData.name }]
-    if (!!formData.advisors) {
-      advisors = [...advisors, ...formData.advisors]
-    }
-    let academicYear: number
-    if (!formData.academicYear)
-      academicYear = Number(new Date().getFullYear() + 543)
-    else academicYear = Number(formData.academicYear)
-
-    const projectData = {
-      title,
-      username,
-      academicYear,
-      status: {
-        documentStatus: '',
-        projectStatus: 'ดำเนินการเตรียมโครงงาน',
-      },
-      developers,
-      advisors,
-      updateBy: tokenData.name,
-    }
-
-    // Save project to database
-    const project = await projectRepo.CreateProject(projectData)
-
-    res.status(200).json(project.title)
-  } catch (error) {
-    res.json({ message: (error as Error).message })
-  }
-}
-
-export const DeleteProject = (req: Request, res: Response) => {
-  res.json({ message: 'Delete Project' })
-}
-
-export const UpdateProject = (req: Request, res: Response) => {
-  res.json({ message: 'Update Project' })
-}
+export default ProjectController

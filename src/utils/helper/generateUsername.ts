@@ -1,4 +1,6 @@
-import Project from '../../models/Project'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 const generateUsername = async (): Promise<string> => {
   const now = new Date()
@@ -7,7 +9,7 @@ const generateUsername = async (): Promise<string> => {
   const randomNumber = Math.floor(Math.random() * 1000)
   const formattedNumber = randomNumber.toString().padStart(3, '0')
   const randomUsername = `cpe${currentYear}-${formattedNumber}`
-  const existingUser = await Project.findOne({ username: randomUsername })
+  const existingUser = await prisma.user.findUnique({ where: { username: randomUsername } })
 
   if (existingUser) {
     return generateUsername()

@@ -1,14 +1,14 @@
 import express from 'express'
-import UserController from '@/controllers/v1/UserController'
+import useUserController from '@/controllers/v1/UserController'
 import { HelloMiddleware } from '@/middlewares/authCheck'
 
 const router = express.Router()
-const useUserController = UserController()
+const userController = useUserController()
 
-router.get('', HelloMiddleware, useUserController.ListUsers)
-router.get('/:id', useUserController.FindUserByID)
-router.put('/:id', useUserController.UpdateUser)
-router.delete('/:id', useUserController.DeleteUserByID)
-router.post('', useUserController.CreateUser)
+router.get('', HelloMiddleware, userController.ListUsers)
+router.get('/:id', userController.FindUserByID)
+router.put('/:id', userController.UpdateUser)
+router.delete('/:id', userController.DeleteUserByID)
+router.post('', userController.CreateUser)
 
 export = router

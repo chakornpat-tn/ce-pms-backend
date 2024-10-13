@@ -41,14 +41,14 @@ datasource db {
     academicYear   Int     @map("academic_year")
     type           String? @map("type")
 
-    projectStatusId Int           @map("project_status_id")
-    proejctStatus   ProjectStatus @relation(fields: [projectStatusId], references: [id])
+    projectStatusId Int?           @map("project_status_id")
+    projectStatus   ProjectStatus? @relation(fields: [projectStatusId], references: [id])
 
     students ProjectStudent[]
     users    ProjectUser[]
 
-    createAt DateTime @default(now()) @map("create_at")
-    updateAt DateTime @updatedAt @map("update_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@map("projects")
   }
@@ -57,8 +57,8 @@ datasource db {
     id        Int      @id @default(autoincrement()) @map("id")
     studentId String   @unique @map("student_id")
     name      String   @map("name")
-    createAt  DateTime @default(now()) @map("create_at")
-    updateAt  DateTime @updatedAt @map("update_at")
+    createdAt  DateTime @default(now()) @map("created_at")
+    updatedAt  DateTime @updatedAt @map("updated_at")
 
     proejects ProjectStudent[]
 
@@ -75,8 +75,8 @@ datasource db {
 
     projects Project[]
 
-    createAt DateTime @default(now()) @map("create_at")
-    updateAt DateTime @updatedAt @map("update_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
     @@map("project_statuses")
   }
