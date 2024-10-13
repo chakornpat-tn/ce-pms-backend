@@ -130,12 +130,6 @@ const useProjectRepository = () => {
 
   const DeleteProject = async (id: number) => {
     return await prisma.$transaction(async (prisma) => {
-      // Delete related entries in projectOnUser table
-      await prisma.projectUser.deleteMany({
-        where: { projectId: id },
-      })
-
-      // Delete the project
       return await prisma.project.delete({
         where: { id },
       })

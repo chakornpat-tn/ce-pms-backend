@@ -146,7 +146,6 @@ const ProjectController = () => {
         utils.SuccessMessage(
           title,
           'Project deleted successfully',
-          deletedProject
         )
       )
     } catch (error) {
