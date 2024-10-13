@@ -1,12 +1,13 @@
 import express from 'express'
-import * as Project from '../../controllers/v1/ProjectController'
+import ProjectController from '@/controllers/v1/ProjectController'
 
 const router = express.Router()
+const projectController = ProjectController()
 
-router.get('', Project.ListProjects)
-router.get('/:id', Project.FindProjectByID)
-router.post('', Project.CreateProject)
-router.put('/:id', Project.UpdateProject)
-router.delete('/:id', Project.DeleteProject)
+router.get('', projectController.ListProjects)
+router.get('/:id', projectController.GetProjectById)
+router.post('',projectController.CreateProject)
+router.put('/:id', projectController.UpdateProject)
+router.delete('/:id', projectController.DeleteProject)
 
 export = router

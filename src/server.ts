@@ -1,5 +1,6 @@
 import app from './app'
 import { PrismaClient } from '@prisma/client'
+import * as utils from '@/utils'
 export const startServer = async () => {
   try {
     await initDatabase()
@@ -13,9 +14,9 @@ const initDatabase = async () => {
   const prisma = new PrismaClient()
   try {
     await prisma.$connect()
-    console.info('Database connection successful!')
+    utils.logger.info('Database connection successful!')
   } catch (error) {
-    console.error('Error connecting to the database:', error)
+    utils.logger.fatal(error,'Error connecting to the database:' )
     throw error
   } finally {
     await prisma.$disconnect()
@@ -24,12 +25,12 @@ const initDatabase = async () => {
 
 const startAppListener = () => {
   app?.listen(process.env.PORT, () => {
-    console.info(`app listening on port ${process.env.PORT}`)
+    utils.logger.info(`app listening on port ${process.env.PORT}`)
   })
 }
 
 const handleServerError = (error: unknown) => {
-  console.error('Error starting server:', (error as Error).message)
+  utils.logger.fatal(error as Error, 'Failed to start server')
   process.exit(1)
 }
 

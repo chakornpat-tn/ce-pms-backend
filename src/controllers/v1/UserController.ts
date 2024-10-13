@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import utils from '@/utils/Response/response'
+import * as utils from '@/utils/'
 import useUserRepository from '@/repositories/v1/UserRepository'
 import userRoles from '@/statics/constants/userRoles/userRoles'
 import bcrypt from 'bcrypt'
@@ -9,8 +9,8 @@ const userRepo = useUserRepository()
 
 const title = 'User Controller V1'
 
-const UserController = () => {
-   const ListUsers = async (req: Request, res: Response) => {
+const useUserController = () => {
+  const ListUsers = async (req: Request, res: Response) => {
     try {
       const page: number = Math.max(parseInt(req.query.page as string) || 1, 1)
       const perPage: number = Math.max(
@@ -36,12 +36,12 @@ const UserController = () => {
         })
       )
     } catch (error) {
-      console.warn('Error:', (error as Error).message)
+      utils.logger.warn(error as Error, 'UserController.ListUsers Error')
       res.status(500).json(utils.ErrorMessage(title, 'Failed to list users'))
     }
   }
 
-   const FindUserByID = async (req: Request, res: Response) => {
+  const FindUserByID = async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10)
       const user = await userRepo.FindUserByID(id)
@@ -53,12 +53,12 @@ const UserController = () => {
         res.status(200).json(utils.NotFoundMessage)
       }
     } catch (error) {
-      console.warn('Error:', (error as Error).message)
+      utils.logger.warn(error as Error, 'UserController.FindUserByID Error')
       res.status(500).json(utils.ErrorMessage(title, 'Find user error'))
     }
   }
 
-   const DeleteUserByID = async (req: Request, res: Response) => {
+  const DeleteUserByID = async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10)
       const user = await userRepo.DeleteUserByID(id)
@@ -68,12 +68,12 @@ const UserController = () => {
         res.status(404).json({ message: 'User not found' })
       }
     } catch (error) {
-      console.warn('Error:', (error as Error).message)
+      utils.logger.warn(error as Error, 'UserController.DeleteUserByID Error')
       res.status(500).json(utils.ErrorMessage(title, 'Failed to delete user'))
     }
   }
 
-   const UpdateUser = async (req: Request, res: Response) => {
+  const UpdateUser = async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10)
       const user = req.body
@@ -89,11 +89,11 @@ const UserController = () => {
         .status(200)
         .json(utils.SuccessMessage(title, 'Update user successfully'))
     } catch (error) {
-      console.warn('Error:', (error as Error).message)
+      utils.logger.warn(error as Error, 'UserController.UpdateUser Error')
       res.status(500).json(utils.ErrorMessage(title, 'Failed to update user'))
     }
   }
-   const CreateUser = async (req: Request, res: Response) => {
+  const CreateUser = async (req: Request, res: Response) => {
     try {
       const userData = req.body
 
@@ -111,7 +111,7 @@ const UserController = () => {
         .status(200)
         .json(utils.SuccessMessage(title, 'Create user successfully'))
     } catch (error) {
-      console.warn('Error:', (error as Error).message)
+      utils.logger.warn(error as Error, "UserController.CreateUser Error")
       res.status(500).json(utils.ErrorMessage(title, 'Failed to create user'))
     }
   }
@@ -121,8 +121,8 @@ const UserController = () => {
     FindUserByID,
     DeleteUserByID,
     UpdateUser,
-    CreateUser
+    CreateUser,
   }
 }
 
-export default UserController
+export default useUserController

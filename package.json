@@ -17,13 +17,15 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "jose": "^5.8.0",
-    "mongoose": "^8.6.0"
+    "pino": "^9.4.0",
+    "pino-pretty": "^11.2.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/node": "^22.5.1",
+    "@types/pino": "^7.0.5",
     "prisma": "^5.19.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",

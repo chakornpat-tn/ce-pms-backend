@@ -1,8 +1,8 @@
 import { Request, Response } from 'express'
-import { encrypt } from '../../utils/JWT/jwt'
+import { encrypt } from '../../utils/jwt/jwt'
 import bcrypt from 'bcrypt'
 import useAuthRepository from '../../repositories/v1/AuthRepository'
-import utils from '@/utils/Response/response'
+import * as utils from '@/utils'
 
 const authRepo = useAuthRepository()
 
@@ -40,7 +40,7 @@ const useAuthController = () => {
         .status(200)
         .json(utils.SuccessMessage(title, 'login successfully', { token }))
     } catch (error) {
-      console.warn('useAuthController.Login error :', error)
+      utils.logger.warn(error, 'useAuthController.Login error :')
       return res
         .status(401)
         .json(utils.UnauthorizedMessage(title))
@@ -99,6 +99,6 @@ export default useAuthController
 //       token: token,
 //     })
 //   } catch (error) {
-//     return res.status(401).json({ message: (error as Error).message })
+//     return res.status(401).json({ message: error as Error })
 //   }
 // }
