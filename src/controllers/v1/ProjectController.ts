@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
-import { CreateProjectRequest, ListProjectsFilter } from '@/models/Project'
+import bcrypt from 'bcrypt'
 import useProjectRepository from '@/repositories/v1/ProjectRepository'
 import * as utils from '@/utils'
+import { UpdateProjectRequest,CreateProjectRequest, ListProjectsFilter } from '@/models/Project'
 
 const title = 'Project Controller V1'
 const projectRepo = useProjectRepository()
+const saltRounds = Number(process.env.SALT_ROUNDS)
 
 const ProjectController = () => {
   const CreateProject = async (req: Request, res: Response) => {
@@ -35,10 +37,7 @@ const ProjectController = () => {
 
       res.json(utils.SuccessMessage(title, 'Project created successfully'))
     } catch (error) {
-      utils.logger.warn(
-        error as Error,
-        'ProjectController.CreateProject Error'
-      )
+      utils.logger.warn(error as Error, 'ProjectController.CreateProject Error')
       res
         .status(500)
         .json(utils.ErrorMessage(title, 'Failed to create project'))
@@ -58,10 +57,7 @@ const ProjectController = () => {
         utils.SuccessMessage(title, 'Projects retrieved successfully', projects)
       )
     } catch (error) {
-      utils.logger.warn(
-        error as Error,
-        'ProjectController.ListProjects Error'
-      )
+      utils.logger.warn(error as Error, 'ProjectController.ListProjects Error')
       res
         .status(500)
         .json(utils.ErrorMessage(title, 'Failed to retrieve projects'))
@@ -97,31 +93,20 @@ const ProjectController = () => {
 
   const UpdateProject = async (req: Request, res: Response) => {
     try {
-      const projectId = parseInt(req.params.id)
-      const updateData = req.body
-      const updatedProject = await projectRepo.UpdateProject(updateData)
-      if (!updatedProject) {
-        return res
-          .status(404)
-          .json(
-            utils.NotFoundMessage(
-              'Project not found',
-              'The requested project does not exist'
-            )
-          )
+      let updateData: UpdateProjectRequest = req.body
+      updateData.id = parseInt(req.params.id, 10)
+
+      if (updateData.password) {
+        const passwordHash = await bcrypt.hash(updateData.password, saltRounds)
+        updateData.password = passwordHash
       }
-      res.json(
-        utils.SuccessMessage(
-          title,
-          'Project updated successfully',
-          updatedProject
-        )
-      )
+
+      await projectRepo.UpdateProject(updateData)
+      
+      res.json(utils.SuccessMessage(title, 'Project updated successfully'))
+
     } catch (error) {
-      utils.logger.warn(
-        error as Error,
-        'ProjectController.UpdateProject Error'
-      )
+      utils.logger.warn(error as Error, 'ProjectController.UpdateProject Error')
       res
         .status(500)
         .json(utils.ErrorMessage(title, 'Failed to update project'))
@@ -142,17 +127,9 @@ const ProjectController = () => {
             )
           )
       }
-      res.json(
-        utils.SuccessMessage(
-          title,
-          'Project deleted successfully',
-        )
-      )
+      res.json(utils.SuccessMessage(title, 'Project deleted successfully'))
     } catch (error) {
-      utils.logger.warn(
-        error as Error,
-        'ProjectController.DeleteProject Error'
-      )
+      utils.logger.warn(error as Error, 'ProjectController.DeleteProject Error')
       res
         .status(500)
         .json(utils.ErrorMessage(title, 'Failed to delete project'))

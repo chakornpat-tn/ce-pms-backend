@@ -101,12 +101,12 @@ model ProjectStudent {
 }
 
 model ProjectUser {
-  id        Int     @id @default(autoincrement()) @map("id")
   project   Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
   projectId Int     @map("project_id")
 
   user   User? @relation(fields: [userId], references: [id])
   userId Int   @map("user_id")
 
+  @@id([projectId, userId])
   @@map("project_users")
 }

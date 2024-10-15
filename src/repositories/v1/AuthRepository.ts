@@ -20,6 +20,7 @@ export const useAuthRepository = () => {
     const user = await prisma.user.findUnique({
       where: {
         username,
+        deletedAt: null,
       },
     })
 
