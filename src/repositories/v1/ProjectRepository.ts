@@ -1,5 +1,10 @@
-import { CreateProjectRequest, ListProjectsFilter } from '@/models/Project'
 import { PrismaClient } from '@prisma/client'
+import {
+  CreateProjectRequest,
+  ListProjectsFilter,
+  UpdateProjectRequest,
+  ProjectStudentRequest,
+} from '@/models/Project'
 
 const prisma = new PrismaClient()
 
@@ -53,77 +58,67 @@ const useProjectRepository = () => {
             })),
           },
         },
-        include: {
-          students: {
-            include: {
-              student: true,
-            },
-          },
-          users: {
-            include: {
-              user: true,
-            },
-          },
-          projectStatus: true,
-        },
       })
 
       return project
     })
   }
 
-  const UpdateProject = async (projectData: any) => {
+  const UpdateProject = async (projectData: UpdateProjectRequest) => {
     return await prisma.$transaction(async (prisma) => {
       const updatedProject = await prisma.project.update({
         where: { id: projectData.id },
         data: {
-          username: projectData.username,
-          projectName: projectData.projectName,
-          semester: projectData.semester,
-          academicYear: projectData.academicYear,
-          password: projectData.password,
-          projectNameEng: projectData.projectNameEng,
-          abstract: projectData.abstract,
-          abstractEng: projectData.abstractEng,
-          detail: projectData.detail,
-          detailEng: projectData.detailEng,
-          type: projectData.type,
-          projectStatusId: projectData.projectStatusId,
-          students: {
-            deleteMany: {},
-            create: projectData.students.map((student: any) => ({
-              student: {
-                connectOrCreate: {
-                  where: { studentId: student.studentId },
-                  create: {
-                    studentId: student.studentId,
-                    name: student.name,
+          ...(projectData.projectName && {
+            projectName: projectData.projectName,
+          }),
+          ...(projectData.semester && { semester: projectData.semester }),
+          ...(projectData.academicYear && {
+            academicYear: projectData.academicYear,
+          }),
+          ...(projectData.password && { password: projectData.password }),
+          ...(projectData.projectNameEng && {
+            projectNameEng: projectData.projectNameEng,
+          }),
+          ...(projectData.abstract && { abstract: projectData.abstract }),
+          ...(projectData.abstractEng && {
+            abstractEng: projectData.abstractEng,
+          }),
+          ...(projectData.detail && { detail: projectData.detail }),
+          ...(projectData.detailEng && { detailEng: projectData.detailEng }),
+          ...(projectData.type && { type: projectData.type }),
+          ...(projectData.projectStatusId && {
+            projectStatusId: projectData.projectStatusId,
+          }),
+          ...(projectData.students && {
+            students: {
+              deleteMany: {},
+              create: projectData.students.map(
+                (student: ProjectStudentRequest) => ({
+                  student: {
+                    connectOrCreate: {
+                      where: { studentId: student.studentId },
+                      create: {
+                        studentId: student.studentId,
+                        name: student.name,
+                      },
+                    },
                   },
-                },
-              },
-            })),
-          },
-          users: {
-            deleteMany: {},
-            create: projectData.users.map((id: number) => ({
-              user: { connect: { id } },
-            })),
-          },
-        },
-        include: {
-          students: {
-            include: {
-              student: true,
+                })
+              ),
             },
-          },
-          users: {
-            include: {
-              user: true,
+          }),
+          ...(projectData.users && {
+            users: {
+              deleteMany: {},
+              create: projectData.users.map((user) => ({
+                user: { connect: { id: user.userId } },
+              })),
             },
-          },
-          projectStatus: true,
+          }),
         },
       })
+
       return updatedProject
     })
   }

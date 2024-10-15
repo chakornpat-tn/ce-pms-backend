@@ -7,7 +7,7 @@ const projectController = ProjectController()
 router.get('', projectController.ListProjects)
 router.get('/:id', projectController.GetProjectById)
 router.post('',projectController.CreateProject)
-router.put('/:id', projectController.UpdateProject)
+router.patch('/:id', projectController.UpdateProject)
 router.delete('/:id', projectController.DeleteProject)
 
 export = router
