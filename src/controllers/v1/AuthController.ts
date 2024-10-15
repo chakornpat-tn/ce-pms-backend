@@ -1,15 +1,16 @@
 import { Request, Response } from 'express'
 import { encrypt } from '../../utils/jwt/jwt'
 import bcrypt from 'bcrypt'
-import useAuthRepository from '../../repositories/v1/AuthRepository'
+import useAuthRepository from '@/repositories/v1/AuthRepository'
 import * as utils from '@/utils'
+import userRoles from '@/statics/constants/userRoles/userRoles'
 
 const authRepo = useAuthRepository()
 
 const title = 'Auth Controller V1'
 
 const useAuthController = () => {
-  const Login = async (req: Request, res: Response) => {
+  const User = async (req: Request, res: Response) => {
     try {
       const { username, password } = req.body as {
         username: string
@@ -27,78 +28,78 @@ const useAuthController = () => {
 
       const secretKey = process.env.TOKEN_SECRET
       if (!secretKey) {
-        return res
-          .status(500)
-          .json(utils.ErrorMessage(title, 'secret key not found'))
+        res.status(500).json(utils.ErrorMessage(title, 'secret key not found'))
       }
 
       const { password: _, ...payload } = result
 
       const token = await encrypt(payload)
 
-      return res
+      res
         .status(200)
         .json(utils.SuccessMessage(title, 'login successfully', { token }))
     } catch (error) {
-      utils.logger.warn(error, 'useAuthController.Login error :')
-      return res
-        .status(401)
-        .json(utils.UnauthorizedMessage(title))
+      utils.logger.warn(error, 'useAuthController.User error :')
+      res.status(401).json(utils.UnauthorizedMessage(title))
     }
   }
+
+  const Project = async (req: Request, res: Response) => {
+    try {
+      let token
+      const { username, password } = req.body as {
+        username: string
+        password?: string
+      }
+      const project = await authRepo.FindProjectByUsername(username)
+
+      if (!project) throw new Error(`Could not find project`)
+
+      if (project && !project.password) {
+        const secretKey = process.env.TOKEN_SECRET
+        if (!secretKey)
+          res
+            .status(500)
+            .json(utils.ErrorMessage(title, 'secret key not found'))
+
+        const payload = {
+          id: project.id,
+          name: project.projectName,
+          role: userRoles.Student,
+          firstLogin: true,
+        }
+
+        token = await encrypt(payload)
+      } else if (project && project.password) {
+        if (password == undefined || !password)
+          throw new Error(`Password is required`)
+
+        if (!bcrypt.compareSync(password, project.password))
+          throw new Error('passwords do not match')
+
+        const payload = {
+          id: project.id,
+          name: project.projectName,
+          role: userRoles.Student,
+        }
+        token = await encrypt(payload)
+      }
+
+      res
+        .status(200)
+        .json(utils.SuccessMessage(title, 'login successfully', { token }))
+    } catch (error) {
+      utils.logger.warn(error, 'useAuthController.Project error :')
+      res
+        .status(401)
+        .json(utils.UnauthorizedMessage(title, (error as Error).message))
+    }
+  }
+
   return {
-    Login,
+    User,
+    Project,
   }
 }
 
 export default useAuthController
-// export const ProjectUserLogin = async (req: Request, res: Response) => {
-//   try {
-//     const { username, password } = req.body as {
-//       username: string
-//       password: string
-//     }
-
-//     const secretKey = process.env.TOKEN_SECRET
-//     if (!secretKey) {
-//       return res.status(500).json({ error: 'TOKEN_SECRET is not defined' })
-//     }
-
-//     const user = await AuthRepo.FindProjectByUsername(username)
-
-//     if (!user) {
-//       throw new Error(`Could not find user: ${username}`)
-//     }
-
-//     if (!user.password && user._id && !password) {
-//       const payload = {
-//         id: user._id,
-//         name: user.title,
-//         role: 4,
-//         newProject: true,
-//       }
-
-//       return res.status(200).json({
-//         token: await encrypt(payload),
-//       })
-//     }
-
-//     if (!bcrypt.compareSync(password, user.password)) {
-//       throw new Error('Incorrect password')
-//     }
-
-//     const payload = {
-//       id: user._id,
-//       name: user.title,
-//       role: 4,
-//     }
-
-//     const token = await encrypt(payload)
-
-//     return res.status(200).json({
-//       token: token,
-//     })
-//   } catch (error) {
-//     return res.status(401).json({ message: error as Error })
-//   }
-// }

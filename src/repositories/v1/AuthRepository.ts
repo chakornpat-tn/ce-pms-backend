@@ -1,19 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-export interface IUser {
-  id: string
-  name: string
-  password: string
-  role: number
-}
-
-export interface IProjectRes {
-  _id: string
-  username: string
-  password: string
-  title: string
-}
 
 export const useAuthRepository = () => {
   const FindUserByUsername = async (username: string) => {
@@ -28,9 +15,22 @@ export const useAuthRepository = () => {
 
     return user
   }
+
+  const FindProjectByUsername = async (username: string) => {
+    const project = await prisma.project.findUnique({
+      where: {
+        username,
+      },
+    })
+    
+    if (!project) return null
+
+    return project
+  }
   
   return {
     FindUserByUsername,
+    FindProjectByUsername
   }
 }
 
