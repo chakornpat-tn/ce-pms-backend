@@ -12,96 +12,101 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-  model User {
-    id       Int     @id @default(autoincrement()) @map("id")
-    name     String? @map("name")
-    username String  @unique @map("username")
-    password String  @map("password")
-    role     Int     @default(3) @map("role")
 
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+model User {
+  id       Int     @id @default(autoincrement()) @map("id")
+  name     String? @map("name")
+  username String  @unique @map("username")
+  password String  @map("password")
+  role     Int     @default(3) @map("role")
 
-    projectUser ProjectUser[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@map("users")
-  }
+  deletedAt DateTime? @map("deleted_at")
 
-  model Project {
-    id             Int     @id @default(autoincrement()) @map("id")
-    username       String  @unique @map("username")
-    password       String? @map("password")
-    projectName    String  @map("project_name")
-    projectNameEng String? @map("project_name_eng")
-    abstract       String? @map("abstract")
-    abstractEng    String? @map("abstract_eng")
-    detail         String? @map("detail")
-    detailEng      String? @map("detail_eng")
-    semester       Int     @default(1) @map("semester")
-    academicYear   Int     @map("academic_year")
-    type           String? @map("type")
+  projectUser ProjectUser[]
 
-    projectStatusId Int?           @map("project_status_id")
-    projectStatus   ProjectStatus? @relation(fields: [projectStatusId], references: [id])
+  @@map("users")
+}
 
-    students ProjectStudent[]  @relation("ProjectStudent")
-    users    ProjectUser[]  @relation("ProjectUser")
+model Project {
+  id             Int     @id @default(autoincrement()) @map("id")
+  username       String  @unique @map("username")
+  password       String? @map("password")
+  projectName    String  @map("project_name")
+  projectNameEng String? @map("project_name_eng")
+  abstract       String? @map("abstract")
+  abstractEng    String? @map("abstract_eng")
+  detail         String? @map("detail")
+  detailEng      String? @map("detail_eng")
+  semester       Int     @default(1) @map("semester")
+  academicYear   Int     @map("academic_year")
+  type           String? @map("type")
 
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  projectStatusId Int?           @map("project_status_id")
+  projectStatus   ProjectStatus? @relation(fields: [projectStatusId], references: [id])
 
-    @@map("projects")
-  }
+  courseStatus Int @default(1) @map("course_status")
 
-  model Student {
-    id        Int      @id @default(autoincrement()) @map("id")
-    studentId String   @unique @map("student_id")
-    name      String   @map("name")
-    createdAt  DateTime @default(now()) @map("created_at")
-    updatedAt  DateTime @updatedAt @map("updated_at")
+  students ProjectStudent[] @relation("ProjectStudent")
+  users    ProjectUser[]    @relation("ProjectUser")
 
-    proejects ProjectStudent[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@map("students")
-  }
+  @@map("projects")
+}
 
-  model ProjectStatus {
-    id        Int     @id @default(autoincrement()) @map("id")
-    name      String  @map("name")
-    subject   Int     @default(1) @map("subject")
-    textColor String  @map("text_color")
-    bgColor   String  @map("bg_color")
-    isActive  Boolean @default(true) @map("is_active")
+model Student {
+  id        Int      @id @default(autoincrement()) @map("id")
+  studentId String   @unique @map("student_id")
+  name      String   @map("name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    projects Project[]
+  proejects ProjectStudent[]
 
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("students")
+}
 
-    @@map("project_statuses")
-  }
+model ProjectStatus {
+  id        Int     @id @default(autoincrement()) @map("id")
+  name      String  @map("name")
+  subject   Int     @default(1) @map("subject")
+  textColor String  @map("text_color")
+  bgColor   String  @map("bg_color")
+  isActive  Boolean @default(true) @map("is_active")
 
-  model ProjectStudent {
-    project   Project? @relation("ProjectStudent", fields: [projectId], references: [id], onDelete: Cascade)
-    projectId Int      @map("project_id")
+  projects Project[]
 
-    student   Student? @relation(fields: [studentId], references: [id])
-    studentId Int      @map("student_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    createdAt DateTime @default(now()) @map("created_at")
-    updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("project_statuses")
+}
 
-    @@id([projectId, studentId])
-    @@map("project_students")
-  }
+model ProjectStudent {
+  project   Project? @relation("ProjectStudent", fields: [projectId], references: [id], onDelete: Cascade)
+  projectId Int      @map("project_id")
 
-  model ProjectUser {
-    id        Int      @id @default(autoincrement()) @map("id")
-    project   Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
-    projectId Int      @map("project_id")
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId Int      @map("student_id")
 
-    user   User? @relation(fields: [userId], references: [id])
-    userId Int   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@map("project_users")
-  }
+  @@id([projectId, studentId])
+  @@map("project_students")
+}
+
+model ProjectUser {
+  id        Int     @id @default(autoincrement()) @map("id")
+  project   Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
+  projectId Int     @map("project_id")
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int   @map("user_id")
+
+  @@map("project_users")
+}

@@ -16,6 +16,9 @@ const CountUsers = async (search?: string, roleFilter?: number) => {
     where: {
       AND: [
         {
+          deletedAt: null,
+        },
+        {
           OR: [
             search
               ? {
@@ -46,7 +49,6 @@ const CountUsers = async (search?: string, roleFilter?: number) => {
 
   return totalCount
 }
-
 export const useUserRepository = () => {
   const GetUsers = async (
     page: number,
@@ -59,6 +61,9 @@ export const useUserRepository = () => {
     const users = await prisma.user.findMany({
       where: {
         AND: [
+          {
+            deletedAt: null,
+          },
           {
             OR: [
               search
@@ -100,6 +105,7 @@ export const useUserRepository = () => {
     const user = await prisma.user.findUnique({
       where: {
         id: id,
+        deletedAt: null,
       },
       select: userSelect,
     })
@@ -107,9 +113,12 @@ export const useUserRepository = () => {
   }
 
   const DeleteUserByID = async (id: number) => {
-    const user = await prisma.user.delete({
+    const user = await prisma.user.update({
       where: {
         id: id,
+      },
+      data: {
+        deletedAt: new Date(),
       },
     })
     return user

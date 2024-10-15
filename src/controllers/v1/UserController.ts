@@ -50,7 +50,7 @@ const useUserController = () => {
           .status(200)
           .json(utils.SuccessMessage(title, 'Update user successfully', user))
       } else {
-        res.status(200).json(utils.NotFoundMessage)
+        res.status(404).json(utils.NotFoundMessage())
       }
     } catch (error) {
       utils.logger.warn(error as Error, 'UserController.FindUserByID Error')
@@ -61,12 +61,8 @@ const useUserController = () => {
   const DeleteUserByID = async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id, 10)
-      const user = await userRepo.DeleteUserByID(id)
-      if (user) {
-        res.status(200)
-      } else {
-        res.status(404).json({ message: 'User not found' })
-      }
+      await userRepo.DeleteUserByID(id)
+      res.status(200).send()
     } catch (error) {
       utils.logger.warn(error as Error, 'UserController.DeleteUserByID Error')
       res.status(500).json(utils.ErrorMessage(title, 'Failed to delete user'))
@@ -111,7 +107,7 @@ const useUserController = () => {
         .status(200)
         .json(utils.SuccessMessage(title, 'Create user successfully'))
     } catch (error) {
-      utils.logger.warn(error as Error, "UserController.CreateUser Error")
+      utils.logger.warn(error as Error, 'UserController.CreateUser Error')
       res.status(500).json(utils.ErrorMessage(title, 'Failed to create user'))
     }
   }
