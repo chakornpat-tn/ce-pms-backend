@@ -21,7 +21,7 @@ model User {
   role     Int     @default(3) @map("role")
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   deletedAt DateTime? @map("deleted_at")
 
@@ -53,7 +53,7 @@ model Project {
   users    ProjectUser[]    @relation("ProjectUser")
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("projects")
 }
@@ -63,7 +63,7 @@ model Student {
   studentId String   @unique @map("student_id")
   name      String   @map("name")
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   proejects ProjectStudent[]
 
@@ -71,17 +71,18 @@ model Student {
 }
 
 model ProjectStatus {
-  id        Int     @id @default(autoincrement()) @map("id")
-  name      String  @map("name")
-  subject   Int     @default(1) @map("subject")
-  textColor String  @map("text_color")
-  bgColor   String  @map("bg_color")
-  isActive  Boolean @default(true) @map("is_active")
+  id               Int     @id @default(autoincrement()) @map("id")
+  name             String  @map("name")
+  course           Int     @default(1) @map("course")
+  textColor        String  @map("text_color")
+  bgColor          String  @map("bg_color")
+  isActive         Boolean @default(true) @map("is_active")
+  isSubmissionOpen Boolean @default(false) @map("is_submission_open")
 
   projects Project[]
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("project_statuses")
 }
@@ -94,7 +95,7 @@ model ProjectStudent {
   studentId Int      @map("student_id")
 
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@id([projectId, studentId])
   @@map("project_students")

@@ -1,0 +1,14 @@
+-- AlterTable
+ALTER TABLE "project_statuses" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "project_students" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "projects" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "students" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "users" ALTER COLUMN "updated_at" SET DEFAULT CURRENT_TIMESTAMP;
