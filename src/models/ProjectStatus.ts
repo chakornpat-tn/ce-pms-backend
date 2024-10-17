@@ -5,7 +5,6 @@ export interface ProjectStatus {
   textColor: string
   bgColor: string
   isActive: boolean
-  isSubmissionOpen: boolean
 }
 
 export interface CreateOrUpdateProjectStatusRequest {
@@ -15,12 +14,10 @@ export interface CreateOrUpdateProjectStatusRequest {
   textColor: string
   bgColor: string
   isActive?: boolean
-  isSubmissionOpen?: boolean
 }
 
 export interface ListProjectStatusRequest {
   course: number
   search?: string
   isActive?: boolean
-  isSubmissionOpen?: boolean
 }
