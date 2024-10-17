@@ -7,3 +7,5 @@ const courseStatus = {
     Pass: 6,
     Fail: 7
 }
+
+export default courseStatus

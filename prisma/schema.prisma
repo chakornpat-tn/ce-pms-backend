@@ -77,7 +77,6 @@ model ProjectStatus {
   textColor        String  @map("text_color")
   bgColor          String  @map("bg_color")
   isActive         Boolean @default(true) @map("is_active")
-  isSubmissionOpen Boolean @default(false) @map("is_submission_open")
 
   projects Project[]
 
