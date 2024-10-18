@@ -71,12 +71,12 @@ model Student {
 }
 
 model ProjectStatus {
-  id               Int     @id @default(autoincrement()) @map("id")
-  name             String  @map("name")
-  course           Int     @default(1) @map("course")
-  textColor        String  @map("text_color")
-  bgColor          String  @map("bg_color")
-  isActive         Boolean @default(true) @map("is_active")
+  id        Int     @id @default(autoincrement()) @map("id")
+  name      String  @map("name")
+  course    Int     @default(1) @map("course")
+  textColor String  @map("text_color")
+  bgColor   String  @map("bg_color")
+  isActive  Boolean @default(true) @map("is_active")
 
   projects Project[]
 
@@ -84,6 +84,19 @@ model ProjectStatus {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("project_statuses")
+}
+
+model Document {
+  id             Int     @id @default(autoincrement()) @map("id")
+  name           String  @map("name")
+  course         Int     @default(1) @map("course")
+  submissionOpen Boolean @default(false) @map("submission_open")
+  isActive       Boolean @default(true) @map("is_active")
+
+  createAt  DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("documents")
 }
 
 model ProjectStudent {
