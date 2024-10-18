@@ -7,7 +7,7 @@ export interface ProjectStatus {
   isActive: boolean
 }
 
-export interface CreateOrUpdateProjectStatusRequest {
+export interface UpdateProjectStatusRequest {
   id?: number
   name: string
   course: number
@@ -17,7 +17,7 @@ export interface CreateOrUpdateProjectStatusRequest {
 }
 
 export interface ListProjectStatusRequest {
-  course: number
+  course?: number
   search?: string
   isActive?: boolean
 }

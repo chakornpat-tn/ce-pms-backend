@@ -4,6 +4,7 @@ import {
   ListProjectsFilter,
   UpdateProjectRequest,
   ProjectStudentRequest,
+  UpdateProjectsRequest,
 } from '@/models/Project'
 
 const prisma = new PrismaClient()
@@ -90,6 +91,9 @@ const useProjectRepository = () => {
           ...(projectData.projectStatusId && {
             projectStatusId: projectData.projectStatusId,
           }),
+          ...(projectData.courseStatus !== undefined && {
+            courseStatus: projectData.courseStatus,
+          }),
           ...(projectData.students && {
             students: {
               deleteMany: {},
@@ -120,6 +124,32 @@ const useProjectRepository = () => {
       })
 
       return updatedProject
+    })
+  }
+  const UpdateProjects = async (projectData: UpdateProjectsRequest) => {
+    const updateData = {
+      ...(projectData.courseStatus !== undefined && {
+        courseStatus: projectData.courseStatus,
+      }),
+      ...(projectData.projectStatusId !== undefined && {
+        projectStatusId: projectData.projectStatusId,
+      }),
+      ...(projectData.semester !== undefined && {
+        semester: projectData.semester,
+      }),
+      ...(projectData.academicYear !== undefined && {
+        academicYear: projectData.academicYear,
+      }),
+      ...(projectData.type !== undefined && { type: projectData.type }),
+    }
+
+    return await prisma.project.updateMany({
+      where: {
+        id: {
+          in: projectData.ids,
+        },
+      },
+      data: updateData,
     })
   }
 
@@ -239,6 +269,7 @@ const useProjectRepository = () => {
   return {
     CreateProject,
     UpdateProject,
+    UpdateProjects,
     GetProjectById,
     DeleteProject,
     ListProjects,

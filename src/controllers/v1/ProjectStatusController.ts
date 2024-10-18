@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import * as utils from '@/utils'
 import {
-  CreateOrUpdateProjectStatusRequest,
+  UpdateProjectStatusRequest,
   ListProjectStatusRequest,
 } from '@/models/ProjectStatus'
 import useProjectStatusRepository from '@/repositories/v1/ProjectStatusRepository'
@@ -10,13 +10,35 @@ const title = 'ProjectStatus Controller V1'
 const projectStatusRepo = useProjectStatusRepository()
 
 const useProjectStatusController = () => {
+  const CreateProjectStatus = async (req: Request, res: Response) => {
+    try {
+      const reqData = req.body
+      if (!reqData.course) throw new Error('course is required')
+      await projectStatusRepo.CreateProjectStatus(reqData)
+
+      res
+        .status(200)
+        .json(
+          utils.SuccessMessage(title, 'create project status successfully.')
+        )
+    } catch (error) {
+      utils.logger.warn(error, 'Create Project Status Controller Error')
+      res.status(500).json(utils.ErrorMessage(title, 'create project status error.'))
+    }
+  }
+
   const ListProjectStatus = async (req: Request, res: Response) => {
     try {
-      const reqData: ListProjectStatusRequest = req.body
-      if (!reqData.course) throw new Error('user bad request')
-      else reqData.course = Number(reqData.course)
+      const course = req.query.course ? parseInt(req.query.course as string) : undefined
+      const listRequest : ListProjectStatusRequest = {
+        course: course,
+        isActive: req.query.isActive
+          ? (req.query.isActive as string) === 'true'
+          : undefined,
+        search: req.query.search ? (req.query.search as string) : undefined,
+      }
 
-      const projectStatuses = await projectStatusRepo.ListProjectStatus(reqData)
+      const projectStatuses = await projectStatusRepo.ListProjectStatus(listRequest)
       res
         .status(200)
         .json(
@@ -28,39 +50,50 @@ const useProjectStatusController = () => {
         )
     } catch (error) {
       utils.logger.warn(error, 'List Project Status Controller Error')
-      res.json(utils.ErrorMessage(title, 'list project status error.'))
+      res.status(500).json(utils.ErrorMessage(title, 'list project status error.'))
     }
   }
 
-  const CreateOrUpdateProjectStatus = async (req: Request, res: Response) => {
+  const UpdateProjectStatus = async (req: Request, res: Response) => {
     try {
-      const reqData: CreateOrUpdateProjectStatusRequest[] = req.body
+      const reqData: UpdateProjectStatusRequest[] = req.body
       if (!reqData[0].course) throw new Error('user bad request')
 
-      await projectStatusRepo.CreateOrUpdateProjectStatus(reqData)
+      await projectStatusRepo.UpdateProjectStatus(reqData)
 
       res
         .status(200)
         .json(
-          utils.SuccessMessage(
-            title,
-            'create or update project status successfully.'
-          )
+          utils.SuccessMessage(title, 'update project status successfully.')
         )
     } catch (error) {
-      utils.logger.warn(
-        error,
-        'Create or Update Project Status Controller Error'
-      )
-      res.json(
-        utils.ErrorMessage(title, 'create or update project status error.')
-      )
+      utils.logger.warn(error, 'Update Project Status Controller Error')
+      res.status(500).json(utils.ErrorMessage(title, 'update project status error.'))
     }
   }
 
+  const DeleteProjectStatus = async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id)
+      if (!id) throw new Error('user bad request')
+
+      await projectStatusRepo.DeleteProjectStatus(id)
+
+      res
+        .status(200)
+        .json(
+          utils.SuccessMessage(title, 'delete project status successfully.')
+        )
+    } catch (error) {
+      utils.logger.warn(error, 'Delete Project Status Controller Error')
+      res.status(500).json(utils.ErrorMessage(title, 'delete project status error.'))
+    }
+  }
   return {
+    CreateProjectStatus,
     ListProjectStatus,
-    CreateOrUpdateProjectStatus,
+    UpdateProjectStatus,
+    DeleteProjectStatus,
   }
 }
 

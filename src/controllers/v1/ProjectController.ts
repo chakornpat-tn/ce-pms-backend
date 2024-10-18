@@ -2,7 +2,12 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import useProjectRepository from '@/repositories/v1/ProjectRepository'
 import * as utils from '@/utils'
-import { UpdateProjectRequest,CreateProjectRequest, ListProjectsFilter } from '@/models/Project'
+import {
+  UpdateProjectRequest,
+  CreateProjectRequest,
+  ListProjectsFilter,
+  UpdateProjectsRequest,
+} from '@/models/Project'
 
 const title = 'Project Controller V1'
 const projectRepo = useProjectRepository()
@@ -102,14 +107,31 @@ const ProjectController = () => {
       }
 
       await projectRepo.UpdateProject(updateData)
-      
-      res.json(utils.SuccessMessage(title, 'Project updated successfully'))
 
+      res
+        .status(200)
+        .json(utils.SuccessMessage(title, 'Project updated successfully'))
     } catch (error) {
       utils.logger.warn(error as Error, 'ProjectController.UpdateProject Error')
       res
         .status(500)
         .json(utils.ErrorMessage(title, 'Failed to update project'))
+    }
+  }
+
+  const UpdateProjects = async (req: Request, res: Response) => {
+    try {
+      const updateData: UpdateProjectsRequest = req.body
+      await projectRepo.UpdateProjects(updateData)
+
+      res
+        .status(200)
+        .json(utils.SuccessMessage(title, 'Projects updated successfully'))
+    } catch (error) {
+      utils.logger.warn(error as Error, 'ProjectController.DeleteProject Error')
+      res
+        .status(500)
+        .json(utils.ErrorMessage(title, 'Failed to delete projects'))
     }
   }
 
@@ -141,6 +163,7 @@ const ProjectController = () => {
     ListProjects,
     GetProjectById,
     UpdateProject,
+    UpdateProjects,
     DeleteProject,
   }
 }
