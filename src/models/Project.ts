@@ -12,7 +12,6 @@ export interface Project {
   academicYear: number
   type?: string | null
   projectStatusId?: number | null
-  projectStatus?: ProjectStatus | null
   courseStatus: number
   students: ProjectStudent[]
   users: ProjectUser[]
@@ -50,10 +49,18 @@ export interface UpdateProjectRequest {
   academicYear: number
   type?: string | null
   projectStatusId?: number | null
-  projectStatus?: ProjectStatus | null
-  courseStatus: number
+  courseStatus?: number
   students: ProjectStudentRequest[]
   users: ProjectUser[]
+}
+
+export interface UpdateProjectsRequest {
+  ids: number[]
+  courseStatus?: number
+  projectStatusId?: number | null
+  semester?: number
+  academicYear?: number
+  type?: string | null
 }
 
 export interface ProjectStudentRequest {

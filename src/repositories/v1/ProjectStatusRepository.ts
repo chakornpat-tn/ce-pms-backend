@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Project } from '@prisma/client'
 import {
-  CreateOrUpdateProjectStatusRequest,
+  ProjectStatus,
+  UpdateProjectStatusRequest,
   ListProjectStatusRequest,
 } from '@/models/ProjectStatus'
 
@@ -12,7 +13,7 @@ const useProjectStatusRepository = () => {
       where: {
         AND: [
           {
-            course: req.course,
+            course: req.course ? req.course : undefined,
           },
           {
             isActive: req.isActive !== undefined ? req.isActive : undefined,
@@ -41,8 +42,8 @@ const useProjectStatusRepository = () => {
     })
   }
 
-  const CreateOrUpdateProjectStatus = async (
-    projectStatusData: CreateOrUpdateProjectStatusRequest[]
+  const UpdateProjectStatus = async (
+    projectStatusData: UpdateProjectStatusRequest[]
   ) => {
     const projectStatusIDs = projectStatusData
       .filter((status) => status.id && status.id > 0)
@@ -89,9 +90,36 @@ const useProjectStatusRepository = () => {
 
     return transactionResult
   }
+
+  const CreateProjectStatus = async (projectStatusData: ProjectStatus) => {
+    const newProjectStatus = await prisma.projectStatus.create({
+      data: {
+        name: projectStatusData.name,
+        course: projectStatusData.course,
+        textColor: projectStatusData.textColor,
+        bgColor: projectStatusData.bgColor,
+        isActive: projectStatusData.isActive,
+      },
+    })
+
+    return newProjectStatus
+  }
+
+  const DeleteProjectStatus = async (id: number) => {
+    const deletedProjectStatus = await prisma.projectStatus.delete({
+      where: {
+        id: id,
+      },
+    })
+
+    return deletedProjectStatus
+  }
+
   return {
+    CreateProjectStatus,
     ListProjectStatus,
-    CreateOrUpdateProjectStatus,
+    UpdateProjectStatus,
+    DeleteProjectStatus,
   }
 }
 
