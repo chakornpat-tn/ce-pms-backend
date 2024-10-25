@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement()) @map("id")
+  name        String?       @map("name")
+  username    String        @unique @map("username")
+  password    String        @map("password")
+  role        Int           @default(3) @map("role")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+  projectUser ProjectUser[]
+
+  @@map("users")
+}
+
+model Project {
+  id              Int               @id @default(autoincrement()) @map("id")
+  username        String            @unique @map("username")
+  password        String?           @map("password")
+  projectName     String            @map("project_name")
+  projectNameEng  String?           @map("project_name_eng")
+  abstract        String?           @map("abstract")
+  abstractEng     String?           @map("abstract_eng")
+  detail          String?           @map("detail")
+  detailEng       String?           @map("detail_eng")
+  semester        Int               @default(1) @map("semester")
+  academicYear    Int               @map("academic_year")
+  type            String?           @map("type")
+  projectStatusId Int?              @map("project_status_id")
+  courseStatus    Int               @default(1) @map("course_status")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
+  documents       ProjectDocument[] @relation("ProjectDocument")
+  students        ProjectStudent[]  @relation("ProjectStudent")
+  users           ProjectUser[]     @relation("ProjectUser")
+  projectStatus   ProjectStatus?    @relation(fields: [projectStatusId], references: [id])
+
+  @@map("projects")
+}
+
+model Student {
+  id        Int              @id @default(autoincrement()) @map("id")
+  studentId String           @unique @map("student_id")
+  name      String           @map("name")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @default(now()) @updatedAt @map("updated_at")
+  proejects ProjectStudent[]
+
+  @@map("students")
+}
+
+model ProjectStatus {
+  id        Int       @id @default(autoincrement()) @map("id")
+  name      String    @map("name")
+  course    Int       @default(1) @map("course")
+  textColor String    @map("text_color")
+  bgColor   String    @map("bg_color")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  projects  Project[]
+
+  @@map("project_statuses")
+}
+
+model Document {
+  id             Int               @id @default(autoincrement()) @map("id")
+  name           String            @map("name")
+  course         Int               @default(1) @map("course")
+  submissionOpen Boolean           @default(false) @map("submission_open")
+  isActive       Boolean           @default(true) @map("is_active")
+  createAt       DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @default(now()) @updatedAt @map("updated_at")
+  projects       ProjectDocument[]
+
+  @@map("documents")
+}
+
+model ProjectStudent {
+  projectId Int      @map("project_id")
+  studentId Int      @map("student_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  project   Project  @relation("ProjectStudent", fields: [projectId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@id([projectId, studentId])
+  @@map("project_students")
+}
+
+model ProjectUser {
+  projectId Int     @map("project_id")
+  userId    Int     @map("user_id")
+  project   Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+  @@map("project_users")
+}
+
+model ProjectDocument {
+  id                Int       @id @default(autoincrement()) @map("id")
+  projectId         Int       @map("project_id")
+  documentId        Int       @map("document_id")
+  documentName      String    @map("document_name")
+  documentUrl       String    @map("document_url")
+  status            Int       @default(1) @map("status")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+  CommentBasedEdits Comment[] @relation("ProjectDocumentCommenBasedEdits")
+  comments          Comment[] @relation("ProjectDocumentComments")
+  document          Document  @relation(fields: [documentId], references: [id], onDelete: NoAction)
+  project           Project   @relation("ProjectDocument", fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_documents")
+}
+
+model Comment {
+  id                    Int              @id @default(autoincrement()) @map("id")
+  content               String           @map("content")
+  projectDocumentId     Int?             @map("project_document_id")
+  ProjectDocumentEditId Int?             @map("project_document_edit_id")
+  cretedAt              DateTime         @default(now()) @map("created_at")
+  updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at")
+  ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [ProjectDocumentEditId], references: [id])
+  ProjectDocument       ProjectDocument? @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])
+
+  @@map("comments")
+}
