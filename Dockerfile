@@ -2,15 +2,10 @@ FROM oven/bun:latest
 
 WORKDIR /app
 
-COPY package.json ./
-COPY bun.lockb ./
-COPY src ./src
-COPY ./.env ./.env
-COPY tsconfig.json ./
-COPY prisma ./prisma
-
+COPY . . 
 RUN bun install
 RUN bunx prisma generate
+RUN bunx prisma migrate deploy
 
-EXPOSE 8000
-CMD ["bun","./src/index.ts"]
+EXPOSE 8000/tcp
+CMD ["bun","dev"]
