@@ -1,27 +1,15 @@
-import { Elysia, t } from 'elysia'
+import { Elysia } from 'elysia'
 import useUserController from '@/controllers/v1/UserController'
 
-const userRoutes = new Elysia({ prefix: '/user' })
-const userController = useUserController()
+const userAPP = new Elysia()
+const userController = useUserController(userAPP)
 
-userRoutes
-  .get('/', userController.ListUsers)
-  .get('/:id', userController.FindUserByID)
-  .put('/:id', userController.UpdateUser,{
-    body: t.Object({
-      name: t.Optional(t.String()),
-      password: t.Optional(t.String()),
-      role: t.Optional(t.Number()),
-    }),
-  })
-  .delete('/:id', userController.DeleteUserByID)
-  .post('/', userController.CreateUser, {
-    body: t.Object({
-      name: t.String(),
-      username: t.String(),
-      password: t.String(),
-      role: t.Optional(t.Number()),
-    }),
-  })
+userAPP.group('/user', app => app
+  .use(userController.ListUsers)
+  .use(userController.FindUserByID)
+  .use(userController.UpdateUser)
+  .use(userController.DeleteUserByID)
+  .use(userController.CreateUser)
+)
 
-export default userRoutes
+export default userAPP

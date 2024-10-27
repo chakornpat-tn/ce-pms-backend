@@ -126,9 +126,9 @@ model ProjectDocument {
 model Comment {
   id                    Int              @id @default(autoincrement()) @map("id")
   content               String           @map("content")
-  projectDocumentId     Int?             @map("project_document_id")
+  projectDocumentId     Int             @map("project_document_id")
   ProjectDocumentEditId Int?             @map("project_document_edit_id")
-  cretedAt              DateTime         @default(now()) @map("created_at")
+  createdAt              DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at")
   ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [ProjectDocumentEditId], references: [id])
   ProjectDocument       ProjectDocument? @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])

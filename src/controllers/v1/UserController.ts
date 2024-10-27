@@ -1,24 +1,32 @@
-import { Context } from 'elysia'
+import { Elysia, t } from 'elysia'
 import * as utils from '@/utils'
 import useUserRepository from '@/repositories/v1/UserRepository'
-import {User} from '@/models/User'
+import { User } from '@/models/User'
 import userRoles from '@/statics/constants/userRoles/userRoles'
-
 
 const saltRounds = Number(process.env.SALT_ROUNDS)
 const userRepo = useUserRepository()
-
 const title = 'User Controller V1'
 
-const useUserController = () => {
-  const ListUsers = async ({ query, set }: Context) => {
+const useUserController = (app: Elysia) => {
+  const ListUsers = app.get('/', async ({ query, set }) => {
     try {
       const page: number = Math.max(parseInt(query.page as string) || 1, 1)
-      const perPage: number = Math.max(parseInt(query.perPage as string) || 30, 1)
-      const role: number | undefined = query.role ? parseInt(query.role as string) : undefined
+      const perPage: number = Math.max(
+        parseInt(query.perPage as string) || 30,
+        1
+      )
+      const role: number | undefined = query.role
+        ? parseInt(query.role as string)
+        : undefined
       const search: string | undefined = query.search as string
 
-      const { totalCount, users } = await userRepo.GetUsers(page, perPage, search, role)
+      const { totalCount, users } = await userRepo.GetUsers(
+        page,
+        perPage,
+        search,
+        role
+      )
 
       return utils.SuccessMessage(title, 'List users successfully', {
         totalCount,
@@ -29,9 +37,9 @@ const useUserController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to list users')
     }
-  }
+  })
 
-  const FindUserByID = async ({ params, set }: Context) => {
+  const FindUserByID = app.get('/:id', async ({ params, set }) => {
     try {
       const id = parseInt(params.id, 10)
       const user = await userRepo.FindUserByID(id)
@@ -46,9 +54,9 @@ const useUserController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Find user error')
     }
-  }
+  })
 
-  const DeleteUserByID = async ({ params, set }: Context) => {
+  const DeleteUserByID = app.delete('/:id', async ({ params, set }) => {
     try {
       const id = parseInt(params.id, 10)
       await userRepo.DeleteUserByID(id)
@@ -59,51 +67,70 @@ const useUserController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to delete user')
     }
-  }
+  })
 
-  const UpdateUser = async ({ params, body, set }: Context) => {
-    try {
-      const id = parseInt(params.id, 10)
-      const req = body as User
+  const UpdateUser = app.put(
+    '/:id',
+    async ({ params, body, set }) => {
+      try {
+        const id = parseInt(params.id, 10)
+        const req = body as User
 
-      if (req.username) throw new Error(`Cannot change username`)
-      if (req.password) {
-        req.password = await Bun.password.hash(req.password, {
+        if (req.username) throw new Error(`Cannot change username`)
+        if (req.password) {
+          req.password = await Bun.password.hash(req.password, {
+            algorithm: 'bcrypt',
+            cost: saltRounds,
+          })
+        }
+
+        await userRepo.UpdateUserByID(id, req)
+        return utils.SuccessMessage(title, 'Update user successfully')
+      } catch (error) {
+        utils.logger.warn(error as Error, 'UserController.UpdateUser Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to update user')
+      }
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String()),
+        password: t.Optional(t.String()),
+        role: t.Optional(t.Number()),
+      }),
+    }
+  )
+
+  const CreateUser = app.post(
+    '/',
+    async ({ body, set }) => {
+      try {
+        const req = body as User
+        if (!req.role) req.role = userRoles.Teacher
+
+        const passwordHash = await Bun.password.hash(req.password, {
           algorithm: 'bcrypt',
           cost: saltRounds,
         })
+        req.password = passwordHash
+        await userRepo.CreateUser(req)
+
+        return utils.SuccessMessage(title, 'Create user successfully')
+      } catch (error) {
+        utils.logger.warn(error as Error, 'UserController.CreateUser Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to create user')
       }
-
-      await userRepo.UpdateUserByID(id, req)
-
-      return utils.SuccessMessage(title, 'Update user successfully')
-    } catch (error) {
-      utils.logger.warn(error as Error, 'UserController.UpdateUser Error')
-      set.status = 500
-      return utils.ErrorMessage(title, 'Failed to update user')
+    },
+    {
+      body: t.Object({
+        name: t.String(),
+        username: t.String(),
+        password: t.String(),
+        role: t.Optional(t.Number()),
+      }),
     }
-  }
-
-  const CreateUser = async ({ body, set }: Context) => {
-    try {
-      const req = body as User
-
-      if (!req.role) req.role = userRoles.Teacher
-
-      const passwordHash = await Bun.password.hash(req.password,{
-        algorithm: 'bcrypt',
-        cost: saltRounds,
-      })
-      req.password = passwordHash
-      await userRepo.CreateUser(req)
-
-      return utils.SuccessMessage(title, 'Create user successfully')
-    } catch (error) {
-      utils.logger.warn(error as Error, 'UserController.CreateUser Error')
-      set.status = 500
-      return utils.ErrorMessage(title, 'Failed to create user')
-    }
-  }
+  )
 
   return {
     ListUsers,

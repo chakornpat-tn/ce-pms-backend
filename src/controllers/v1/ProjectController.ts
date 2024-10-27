@@ -1,5 +1,7 @@
-import { Context } from 'elysia'
+import Elysia, { Context } from 'elysia'
 import useProjectRepository from '@/repositories/v1/ProjectRepository'
+import { bearer } from '@elysiajs/bearer'
+import * as MiddleWare from '@/middleware'
 import * as utils from '@/utils'
 import {
   CreateProjectRequest,
@@ -12,41 +14,41 @@ const title = 'Project Controller V1'
 const projectRepo = useProjectRepository()
 const saltRounds = Number(process.env.SALT_ROUNDS)
 
-const useProjectController = () => {
-  const CreateProject = async ({
-    jwt,
-    bearer,
-    body,
-    set,
-    request,
-  }: Context & { bearer: string,jwt:any }) => {
-    try {
-      const payload = await jwt.verify(bearer)
-      if (!payload) throw new Error(`Invalid token`)
+const useProjectController = (app: Elysia) => {
+  const CreateProject = app
+    .use(MiddleWare.JwtConfig)
+    .use(bearer())
+    .post('/', async ({ jwt, bearer, body, set }) => {
+      try {
+        const payload = await jwt.verify(bearer)
+        if (!payload) throw new Error(`Invalid token`)
 
-      let req = body as CreateProjectRequest
-      const filteredUsers = req.users
-        ? req.users.filter((userId) => userId !== payload.id)
-        : []
-      req.users =
-        req.users?.length > 0
-          ? [payload.id, filteredUsers[0]].slice(0, 2)
-          : [payload.id]
+        let req = body as CreateProjectRequest
+        const filteredUsers = req.users
+          ? req.users.map(Number).filter((userId) => userId !== payload.id)
+          : []
+          
+        req.users =
+          req.users?.length > 0
+            ? [Number(payload.id), filteredUsers[0]].slice(0, 2)
+            : [Number(payload.id)]
 
-      req.academicYear = req.academicYear || new Date().getFullYear() + 543
-      req.semester = req.semester || 1
-      req.username = await utils.generateUsername()
+        req.academicYear = req.academicYear || new Date().getFullYear() + 543
+        req.semester = req.semester || 1
+        req.username = await utils.generateUsername()
 
-      await projectRepo.CreateProject(req)
-      return utils.SuccessMessage(title, 'Project created successfully')
-    } catch (error) {
-      utils.logger.warn(error as Error, 'ProjectController.CreateProject Error')
-      set.status = 500
-      return utils.ErrorMessage(title, 'Failed to create project')
-    }
-  }
-
-  const ListProjects = async ({ query, set }: Context) => {
+        await projectRepo.CreateProject(req)
+        return utils.SuccessMessage(title, 'Project created successfully')
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.CreateProject Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to create project')
+      }
+    })
+  const ListProjects = app.get('/', async ({ query, set }) => {
     try {
       const filter: ListProjectsFilter = {
         academicYear: Number(query.academicYear),
@@ -65,9 +67,9 @@ const useProjectController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to retrieve projects')
     }
-  }
+  })
 
-  const GetProjectById = async ({ params, set }: Context) => {
+  const GetProjectById = app.get('/:id', async ({ params, set }) => {
     try {
       const projectId = parseInt(params.id)
       const project = await projectRepo.GetProjectById(projectId)
@@ -91,30 +93,36 @@ const useProjectController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to retrieve project')
     }
-  }
+  })
 
-  const UpdateProject = async ({ params, body, set }: Context) => {
-    try {
-      let req = body as UpdateProjectRequest
-      req.id = parseInt(params.id, 10)
+  const UpdateProject = app.patch(
+    '/:id',
+    async ({ params, body, set }) => {
+      try {
+        let req = body as UpdateProjectRequest
+        req.id = parseInt(params.id, 10)
 
-      if (req.password) {
-        req.password = await Bun.password.hash(req.password, {
-          algorithm: 'bcrypt',
-          cost: saltRounds,
-        })
+        if (req.password) {
+          req.password = await Bun.password.hash(req.password, {
+            algorithm: 'bcrypt',
+            cost: saltRounds,
+          })
+        }
+
+        await projectRepo.UpdateProject(req)
+        return utils.SuccessMessage(title, 'Project updated successfully')
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.UpdateProject Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to update project')
       }
-
-      await projectRepo.UpdateProject(req)
-      return utils.SuccessMessage(title, 'Project updated successfully')
-    } catch (error) {
-      utils.logger.warn(error as Error, 'ProjectController.UpdateProject Error')
-      set.status = 500
-      return utils.ErrorMessage(title, 'Failed to update project')
     }
-  }
+  )
 
-  const UpdateProjects = async ({ body, set }: Context) => {
+  const UpdateProjects = app.patch('/', async ({ body, set }) => {
     try {
       const req = body as UpdateProjectsRequest
       await projectRepo.UpdateProjects(req)
@@ -127,9 +135,9 @@ const useProjectController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to update projects')
     }
-  }
+  })
 
-  const DeleteProject = async ({ params, set }: Context) => {
+  const DeleteProject = app.delete('/:id', async ({ params, set }) => {
     try {
       const projectId = parseInt(params.id)
       const deletedProject = await projectRepo.DeleteProject(projectId)
@@ -146,12 +154,12 @@ const useProjectController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'Failed to delete project')
     }
-  }
+  })
 
   return {
-    CreateProject,
     ListProjects,
     GetProjectById,
+    CreateProject,
     UpdateProject,
     UpdateProjects,
     DeleteProject,

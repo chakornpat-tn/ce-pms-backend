@@ -1,4 +1,4 @@
-import { Context } from 'elysia'
+import Elysia, { Context } from 'elysia'
 import * as utils from '@/utils'
 import {
   Document,
@@ -10,10 +10,10 @@ import useDocumentRepository from '@/repositories/v1/DocumentRepository'
 const title = 'Document Controller V1'
 const documentRepo = useDocumentRepository()
 
-const useDocumentController = () => {
-  const CreateDocument = async ({ body, set }: Context) => {
+const useDocumentController = (app: Elysia) => {
+  const CreateDocument = app.post('/', async ({ body, set }) => {
     try {
-      const req = body as  Document
+      const req = body as Document
       if (!req.course) throw new Error('course is required')
       await documentRepo.CreateDocument(req)
 
@@ -23,9 +23,9 @@ const useDocumentController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'create document error.')
     }
-  }
+  })
 
-  const ListDocument = async ({ query, set }: Context) => {
+  const ListDocument = app.get('/', async ({ query, set }) => {
     try {
       const course = query.course
         ? parseInt(query.course as string)
@@ -48,9 +48,9 @@ const useDocumentController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'list document error.')
     }
-  }
+  })
 
-  const UpdateDocument = async ({ body, set }: Context) => {
+  const UpdateDocument = app.put('/', async ({ body, set }) => {
     try {
       const req = body as UpdateDocumentRequest[]
       if (!req[0].course) throw new Error('user bad request')
@@ -63,9 +63,9 @@ const useDocumentController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'update document error.')
     }
-  }
+  })
 
-  const DeleteDocument = async ({ params, set }: Context) => {
+  const DeleteDocument = app.delete('/:id', async ({ params, set }) => {
     try {
       const id = Number(params.id)
       if (!id) throw new Error('user bad request')
@@ -78,7 +78,8 @@ const useDocumentController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'delete document error.')
     }
-  }
+  })
+
   return {
     CreateDocument,
     ListDocument,

@@ -1,4 +1,4 @@
-import { Context } from 'elysia'
+import Elysia from 'elysia'
 import * as utils from '@/utils'
 import {
   ProjectStatus,
@@ -10,8 +10,8 @@ import useProjectStatusRepository from '@/repositories/v1/ProjectStatusRepositor
 const title = 'ProjectStatus Controller V1'
 const projectStatusRepo = useProjectStatusRepository()
 
-const useProjectStatusController = () => {
-  const CreateProjectStatus = async ({ body, set }: Context) => {
+const useProjectStatusController = (app: Elysia) => {
+  const CreateProjectStatus = app.post('/', async ({ body, set }) => {
     try {
       const req = body as ProjectStatus
       if (!req.course) throw new Error('course is required')
@@ -23,9 +23,9 @@ const useProjectStatusController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'create project status error.')
     }
-  }
+  })
 
-  const ListProjectStatus = async ({ query, set }: Context) => {
+  const ListProjectStatus = app.get('/', async ({ query, set }) => {
     try {
       const course = query.course ? parseInt(query.course as string) : undefined
       const listRequest : ListProjectStatusRequest = {
@@ -47,9 +47,9 @@ const useProjectStatusController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'list project status error.')
     }
-  }
+  })
 
-  const UpdateProjectStatus = async ({ body, set }: Context) => {
+  const UpdateProjectStatus = app.put('/', async ({ body, set }) => {
     try {
       const reqData = body as UpdateProjectStatusRequest[]
       if (!reqData[0].course) throw new Error('user bad request')
@@ -62,9 +62,9 @@ const useProjectStatusController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'update project status error.')
     }
-  }
+  })
 
-  const DeleteProjectStatus = async ({ params, set }: Context) => {
+  const DeleteProjectStatus = app.delete('/:id', async ({ params, set }) => {
     try {
       const id = Number(params.id)
       if (!id) throw new Error('user bad request')
@@ -77,7 +77,8 @@ const useProjectStatusController = () => {
       set.status = 500
       return utils.ErrorMessage(title, 'delete project status error.')
     }
-  }
+  })
+
   return {
     CreateProjectStatus,
     ListProjectStatus,

@@ -9,12 +9,13 @@ import * as utils from '@/utils'
 
 const app = new Elysia()
   .get('/', () => utils.SuccessMessage('CE-PMS API', 'Health Check'))
-  .group('/v1', app => 
-    app.use(userRoutes)
-       .use(authRoutes)
-       .use(projectRoutes)
-       .use(documentRoutes)
-       .use(projectStatusRoutes)
+  .group('/v1', (app) =>
+    app
+      .use(userRoutes)
+      .use(authRoutes)
+      .use(projectRoutes)
+      .use(documentRoutes)
+      .use(projectStatusRoutes)
   )
 
 export default app
