@@ -38,20 +38,20 @@ export interface CreateProjectRequest {
 
 export interface UpdateProjectRequest {
   id: number
-  password?: string | null
+  password?: string
   projectName: string
-  projectNameEng?: string | null
-  abstract?: string | null
-  abstractEng?: string | null
-  detail?: string | null
-  detailEng?: string | null
-  semester: number
-  academicYear: number
+  projectNameEng?: string
+  abstract?: string
+  abstractEng?: string
+  detail?: string
+  detailEng?: string
+  semester?: number
+  academicYear?: number
   type?: string | null
   projectStatusId?: number | null
   courseStatus?: number
-  students: ProjectStudentRequest[]
-  users: ProjectUser[]
+  students?: ProjectStudentRequest[]
+  users?: ProjectUser[]
 }
 
 export interface UpdateProjectsRequest {

@@ -1,7 +1,8 @@
 import { jwt } from '@elysiajs/jwt'
+import config from '@/config'
 
 export const JwtConfig = jwt({
   name: 'jwt',
-  secret: process.env.TOKEN_SECRET || 'secret-key',
+  secret: config.TOKEN_SECRET,
   exp: '3h',
 })

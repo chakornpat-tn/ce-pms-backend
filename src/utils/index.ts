@@ -1,3 +1,4 @@
 export * from './response/response'
 export *  from './helper/generateUsername'
 export * from './logger/pino'
+export * from './fileStorage/gcs'

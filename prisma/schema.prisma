@@ -127,10 +127,10 @@ model Comment {
   id                    Int              @id @default(autoincrement()) @map("id")
   content               String           @map("content")
   projectDocumentId     Int             @map("project_document_id")
-  ProjectDocumentEditId Int?             @map("project_document_edit_id")
+  projectDocumentEditId Int?             @map("project_document_edit_id")
   createdAt              DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at")
-  ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [ProjectDocumentEditId], references: [id])
+  ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [projectDocumentEditId], references: [id])
   ProjectDocument       ProjectDocument? @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])
 
   @@map("comments")
