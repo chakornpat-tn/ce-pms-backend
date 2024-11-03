@@ -1,11 +1,11 @@
-export interface Document {
+export type Document = {
   id: number
   name: string
   course: number
   isActive: boolean
   submissionOpen: boolean
 }
-  export interface UpdateDocumentRequest {
+  export type UpdateDocumentRequest = {
     id?: number
     name: string
     course: number
@@ -13,7 +13,7 @@ export interface Document {
     submissionOpen?: boolean
   }
 
-  export interface ListDocumentRequest {
+  export type ListDocumentRequest = {
     course?: number
     search?: string
     isActive?: boolean

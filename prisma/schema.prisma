@@ -38,6 +38,7 @@ model Project {
   courseStatus    Int               @default(1) @map("course_status")
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
+  examDateTime    DateTime?         @map("exam_date_time")
   documents       ProjectDocument[] @relation("ProjectDocument")
   students        ProjectStudent[]  @relation("ProjectStudent")
   users           ProjectUser[]     @relation("ProjectUser")
@@ -97,10 +98,13 @@ model ProjectStudent {
 }
 
 model ProjectUser {
-  projectId Int     @map("project_id")
-  userId    Int     @map("user_id")
-  project   Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
-  user      User    @relation(fields: [userId], references: [id])
+  projectId       Int     @map("project_id")
+  userId          Int     @map("user_id")
+  userProjectRole Int     @map("user_project_role")
+  projectDocs     String? @map("project_docs") @db.Text
+  prepDocs        String? @map("prep_docs") @db.Text
+  project         Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
+  user            User    @relation(fields: [userId], references: [id])
 
   @@id([projectId, userId])
   @@map("project_users")
@@ -111,7 +115,7 @@ model ProjectDocument {
   projectId         Int       @map("project_id")
   documentId        Int       @map("document_id")
   documentName      String    @map("document_name")
-  documentUrl       String    @map("document_url")
+  documentUrl       String    @map("document_url") @db.Text
   status            Int       @default(1) @map("status")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -126,9 +130,9 @@ model ProjectDocument {
 model Comment {
   id                    Int              @id @default(autoincrement()) @map("id")
   content               String           @map("content")
-  projectDocumentId     Int             @map("project_document_id")
+  projectDocumentId     Int              @map("project_document_id")
   projectDocumentEditId Int?             @map("project_document_edit_id")
-  createdAt              DateTime         @default(now()) @map("created_at")
+  createdAt             DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at")
   ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [projectDocumentEditId], references: [id])
   ProjectDocument       ProjectDocument? @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])

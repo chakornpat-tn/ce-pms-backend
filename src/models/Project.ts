@@ -1,4 +1,4 @@
-export interface Project {
+export type Project = {
   id: number
   username: string
   password?: string | null
@@ -17,8 +17,9 @@ export interface Project {
   users: ProjectUser[]
   createdAt: Date
   updatedAt: Date
+  examDateTime: Date
 }
-export interface CreateProjectRequest {
+export type CreateProjectRequest = {
   id: number
   username: string
   password?: string
@@ -33,10 +34,10 @@ export interface CreateProjectRequest {
   type?: string
   projectStatusId?: number
   students: ProjectStudentRequest[]
-  users: number[]
+  users: ProjectUser[]
 }
 
-export interface UpdateProjectRequest {
+export type UpdateProjectRequest = {
   id: number
   password?: string
   projectName: string
@@ -52,9 +53,10 @@ export interface UpdateProjectRequest {
   courseStatus?: number
   students?: ProjectStudentRequest[]
   users?: ProjectUser[]
+  examDateTime: Date
 }
 
-export interface UpdateProjectsRequest {
+export type UpdateProjectsRequest = {
   ids: number[]
   courseStatus?: number
   projectStatusId?: number | null
@@ -63,25 +65,28 @@ export interface UpdateProjectsRequest {
   type?: string | null
 }
 
-export interface ProjectStudentRequest {
+export type ProjectStudentRequest = {
   studentId: string
   name: string
 }
 
-export interface ListProjectsFilter {
+export type ListProjectsFilter = {
   academicYear?: number
   semester?: number
   projectName?: string
-  projectStatus?: number
+  projectStatus?: number[]
+  courseStatus?: number[]
 }
 
-export interface ProjectStudent {
+export type ProjectStudent = {
   projectId: number
   studentId: number
 }
 
-export interface ProjectUser {
-  id: number
-  projectId: number
+export type ProjectUser = {
+  projectId?: number
   userId: number
+  userProjectRole: number
+  projectDocs?: string
+  prepDocs?: string
 }

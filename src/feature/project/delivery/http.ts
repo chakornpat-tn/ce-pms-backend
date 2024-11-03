@@ -9,6 +9,7 @@ import {
   UpdateProjectRequest,
   UpdateProjectsRequest,
 } from '@/models/Project'
+import course from '@/statics/constants/course/course'
 
 const title = 'Project Controller V1'
 const projectUsecase = ProjectUsecase
@@ -35,13 +36,16 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
 
         let req = body as CreateProjectRequest
         const filteredUsers = req.users
-          ? req.users.map(Number).filter((userId) => userId !== payload.id)
+          ? req.users.filter((user) => user.userId != payload.id)
           : []
 
-        req.users =
-          req.users?.length > 0
-            ? [Number(payload.id), filteredUsers[0]].slice(0, 2)
-            : [Number(payload.id)]
+        req.users = [
+          {
+            userId: Number(payload.id),
+            userProjectRole: 1,
+          },
+          ...(filteredUsers.length > 0 ? [filteredUsers[0]] : []),
+        ].slice(0, 2)
 
         await projectUsecase.CreateProject(req)
         return utils.SuccessMessage(title, 'Project created successfully')
@@ -74,14 +78,20 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
             })
           )
         ),
-        users: t.Optional(t.Array(t.Number())),
+        users: t.Optional(
+          t.Array(
+            t.Object({
+              userId: t.Number(),
+              userProjectRole: t.Number(),
+            })
+          )
+        ),
         password: t.Optional(t.String()),
       }),
       detail: projectSwaggerDetail(
         'Create a new project',
         'Create a new project'
       ),
-      
     }
   )
   .get(
@@ -91,8 +101,13 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         const filter: ListProjectsFilter = {
           academicYear: query.academicYear,
           semester: query.semester,
-          projectStatus: query.projectStatus || undefined,
+          projectStatus: query.projectStatus
+            ? query.projectStatus.split(',').map(Number)
+            : undefined,
           projectName: query.projectName || undefined,
+          courseStatus: query.courseStatus
+            ? query.courseStatus.split(',').map(Number)
+            : undefined,
         }
         const projects = await projectUsecase.ListProjects(filter)
         return utils.SuccessMessage(
@@ -113,14 +128,25 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
       query: t.Object({
         academicYear: t.Number(),
         semester: t.Number(),
-        projectStatus: t.Optional(t.Number()),
+        projectStatus: t.Optional(t.String()),
         projectName: t.Optional(t.String()),
+        courseStatus: t.Optional(t.String()),
       }),
-      detail: projectSwaggerDetail(
-        'List projects',
-        'Get a list of projects with optional filters'
-      ),
-      
+      detail: {
+        ...projectSwaggerDetail(
+          'List projects',
+          'Get a list of projects with optional filters'
+        ),
+        parameters: [
+          {
+            name: 'courseStatus, projectStatus',
+            in: 'query',
+            required: false,
+            description:
+              'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
+          },
+        ],
+      },
     }
   )
   .get(
@@ -160,7 +186,6 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         ),
       }),
       detail: projectSwaggerDetail('Update a project', 'Update a project'),
-      
     }
   )
   .patch(
@@ -168,7 +193,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
     async ({ params, body, set }) => {
       try {
         let req = body as UpdateProjectRequest
-        req.id = parseInt(params.id, 10)
+        req.id = params.id
 
         await projectUsecase.UpdateProject(req)
         return utils.SuccessMessage(title, 'Project updated successfully')
@@ -182,6 +207,9 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
       }
     },
     {
+      params: t.Object({
+        id: t.Number(),
+      }),
       body: t.Object({
         password: t.Optional(t.String()),
         projectName: t.Optional(t.String()),
@@ -195,6 +223,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         type: t.Optional(t.Union([t.String(), t.Null()])),
         projectStatusId: t.Optional(t.Union([t.Number(), t.Null()])),
         courseStatus: t.Optional(t.Number()),
+        examDateTime: t.Optional(t.Date()),
         students: t.Optional(
           t.Array(
             t.Object({
@@ -207,12 +236,12 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
           t.Array(
             t.Object({
               userId: t.Number(),
+              userProjectRole: t.Number(),
             })
           )
         ),
       }),
       detail: projectSwaggerDetail('Update project', 'Update a project by ID'),
-      
     }
   )
   .patch(
@@ -244,7 +273,6 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         'Update multiple projects',
         'Update multiple projects at once'
       ),
-      
     }
   )
   .delete(
@@ -275,6 +303,5 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         id: t.Number(),
       }),
       detail: projectSwaggerDetail('Delete a project', 'Delete a project'),
-      
     }
   )
