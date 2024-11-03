@@ -6,6 +6,7 @@ import {
   ProjectStudentRequest,
   UpdateProjectsRequest,
 } from '@/models/Project'
+import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
 
 const prisma = new PrismaClient()
 
@@ -51,12 +52,9 @@ export class ProjectRepository {
           }),
           // Connect relations with users
           users: {
-            create: projectData.users.map((id) => ({
-              user: {
-                connect: {
-                  id: id,
-                },
-              },
+            create: projectData.users.map((user) => ({
+              user: { connect: { id: user.userId } },
+              userProjectRole: user.userProjectRole,
             })),
           },
         },
@@ -95,6 +93,9 @@ export class ProjectRepository {
           ...(projectData.courseStatus !== undefined && {
             courseStatus: projectData.courseStatus,
           }),
+          ...(projectData.examDateTime !== undefined && {
+            examDateTime: projectData.examDateTime,
+          }),
           ...(projectData.students && {
             students: {
               deleteMany: {},
@@ -115,9 +116,14 @@ export class ProjectRepository {
           }),
           ...(projectData.users && {
             users: {
-              deleteMany: {},
+              deleteMany: {
+                userProjectRole: {
+                  not: userProjectRole.COMMITTEE,
+                },
+              },
               create: projectData.users.map((user) => ({
                 user: { connect: { id: user.userId } },
+                userProjectRole: user.userProjectRole,
               })),
             },
           }),
@@ -210,62 +216,53 @@ export class ProjectRepository {
   }
 
   static ListProjects = async (filter: ListProjectsFilter) => {
-    const { academicYear, semester, projectName, projectStatus } = filter
+    const { academicYear, semester, projectName, projectStatus, courseStatus } =
+      filter
+
+    const whereConditions = {
+      ...(academicYear && { academicYear }),
+      ...(semester && { semester }),
+      ...(projectName && {
+        projectName: {
+          contains: projectName,
+          mode: 'insensitive' as const,
+        },
+      }),
+      ...(projectStatus && {
+        projectStatusId: {
+          in: projectStatus,
+        },
+      }),
+      ...(courseStatus && {
+        courseStatus: {
+          in: courseStatus,
+        },
+      }),
+    }
+
+    const selectFields = {
+      id: true,
+      username: true,
+      projectName: true,
+      abstract: true,
+      semester: true,
+      academicYear: true,
+      type: true,
+      createdAt: true,
+      updatedAt: true,
+      projectStatus: {
+        select: {
+          id: true,
+          name: true,
+          textColor: true,
+          bgColor: true,
+        },
+      },
+    }
 
     return await prisma.project.findMany({
-      where: {
-        ...(academicYear && { academicYear }),
-        ...(semester && { semester }),
-        ...(projectName && {
-          projectName: {
-            contains: projectName,
-            mode: 'insensitive',
-          },
-        }),
-        ...(projectStatus && {
-          projectStatusId: projectStatus,
-        }),
-      },
-      select: {
-        id: true,
-        username: true,
-        projectName: true,
-        abstract: true,
-        semester: true,
-        academicYear: true,
-        type: true,
-        createdAt: true,
-        updatedAt: true,
-        students: {
-          select: {
-            student: {
-              select: {
-                id: true,
-                studentId: true,
-                name: true,
-              },
-            },
-          },
-        },
-        users: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-        projectStatus: {
-          select: {
-            id: true,
-            name: true,
-            textColor: true,
-            bgColor: true,
-          },
-        },
-      },
+      where: whereConditions,
+      select: selectFields,
     })
   }
 }

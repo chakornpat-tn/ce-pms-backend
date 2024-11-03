@@ -31,7 +31,7 @@ export const ProjectDocumentDelivery = new Elysia({
     async ({ body, set }) => {
       let tempFilePath: string | null = null
       let url: string | null = null
-      const gcs = utils.GCS()
+      const gcs = utils.GCS
       try {
         const req = body as ProjectDocumentRequest
         const data = JSON.parse(req.data) as ProjectDocument
@@ -158,7 +158,7 @@ export const ProjectDocumentDelivery = new Elysia({
     async ({ params, body, set }) => {
       let tempFilePath: string | null = null
       let url: string | null = null
-      const gcs = utils.GCS()
+      const gcs = utils.GCS
       try {
         const req = body as ProjectDocumentRequest
         const data = JSON.parse(req.data) as ProjectDocument
@@ -235,7 +235,7 @@ export const ProjectDocumentDelivery = new Elysia({
   .delete(
     '/:id',
     async ({ params, set }) => {
-      const gcs = utils.GCS()
+      const gcs = utils.GCS
       try {
         const document = await projectDocumentUsecase.GetProjectDocument(
           params.id
