@@ -1,4 +1,4 @@
-interface ProjectDocument {
+type ProjectDocument = {
   id: number
   projectId: number
   documentId: number
@@ -9,7 +9,7 @@ interface ProjectDocument {
   updatedAt: Date
 }
 
-export interface ProjectDocumentRequest {
+export type ProjectDocumentRequest = {
   document: File
   data: string
 }

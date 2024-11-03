@@ -1,4 +1,4 @@
-interface Comment {
+type Comment = {
   id: number
   content: string
   projectDocumentId: number
@@ -7,7 +7,7 @@ interface Comment {
   updatedAt: Date
 }
 
-export interface UpdateCommentsRequest {
+export type UpdateCommentsRequest = {
   ids: number[]
   content: string
   projectDocumentEditId: number | null

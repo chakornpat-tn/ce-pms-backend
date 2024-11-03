@@ -1,4 +1,4 @@
-export interface ProjectStatus {
+export type ProjectStatus =  {
   id: number
   name: string
   course: number
@@ -7,7 +7,7 @@ export interface ProjectStatus {
   isActive: boolean
 }
 
-export interface UpdateProjectStatusRequest {
+export type UpdateProjectStatusRequest =  {
   id?: number
   name: string
   course: number
@@ -16,7 +16,7 @@ export interface UpdateProjectStatusRequest {
   isActive?: boolean
 }
 
-export interface ListProjectStatusRequest {
+export type ListProjectStatusRequest =  {
   course?: number
   search?: string
   isActive?: boolean
