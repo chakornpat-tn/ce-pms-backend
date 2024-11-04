@@ -53,16 +53,16 @@ export const ProjectDocumentDelivery = new Elysia({
         const destination = `${timestamp}-${data.documentName}.pdf`
         tempFilePath = `tmp/${destination}`
         await Bun.write(tempFilePath, req.document)
-        const url = await gcs.UploadFile(tempFilePath, destination)
+        url = await gcs.UploadFile(tempFilePath, destination)
 
         data.documentUrl = url
         await projectDocumentUsecase.CreateProjectDocument(data)
 
-        await fs.rm('tmp', { recursive: true, force: true })
+        if (tempFilePath) await fs.rm(tempFilePath)
 
         return utils.SuccessMessage(title, 'Create project document success.')
       } catch (error) {
-        await fs.rm('tmp', { recursive: true, force: true })
+        if (tempFilePath) await fs.rm(tempFilePath)
 
         if (url) await gcs.DeleteFile(url)
 
@@ -78,7 +78,8 @@ export const ProjectDocumentDelivery = new Elysia({
           description: 'PDF file to upload (max 25MB)',
         }),
         data: t.String({
-          description: 'JSON string containing project document metadata',
+          description:
+            'JSON string containing project document {projectId: number, documentIdn: number, documentName: string } ',
         }),
       }),
       detail: ProjectDocumentSwaggerDetail(
@@ -178,10 +179,10 @@ export const ProjectDocumentDelivery = new Elysia({
           }
         }
 
-        const existingDoc = await projectDocumentUsecase.GetProjectDocument(
+        const existingDocs = await projectDocumentUsecase.GetProjectDocument(
           params.id
         )
-        if (!existingDoc) {
+        if (!existingDocs) {
           set.status = 404
           return utils.ErrorMessage(title, 'Project document not found.')
         }
@@ -196,8 +197,8 @@ export const ProjectDocumentDelivery = new Elysia({
           await Bun.write(tempFilePath, req.document)
           url = await gcs.UploadFile(tempFilePath, destination)
 
-          if (existingDoc.documentUrl) {
-            await gcs.DeleteFile(existingDoc.documentUrl)
+          if (existingDocs.documentUrl) {
+            await gcs.DeleteFile(existingDocs.documentUrl)
           }
           data.documentUrl = url
         }
@@ -205,11 +206,11 @@ export const ProjectDocumentDelivery = new Elysia({
         data.id = params.id
         await projectDocumentUsecase.UpdateProjectDocument(data)
 
-        if (req.document) await fs.rm('tmp', { recursive: true, force: true })
+        if (tempFilePath) await fs.rm(tempFilePath)
 
         return utils.SuccessMessage(title, 'Update project document success.')
       } catch (error) {
-        await fs.rm('tmp', { recursive: true, force: true })
+        if (tempFilePath) await fs.rm(tempFilePath)
 
         if (url) await gcs.DeleteFile(url)
 
@@ -223,8 +224,16 @@ export const ProjectDocumentDelivery = new Elysia({
         id: t.Number(),
       }),
       body: t.Object({
-        document: t.Optional(t.File()),
-        data: t.String(),
+        document: t.Optional(
+          t.File({
+            type: ['application/pdf'],
+            description: 'Project Exam PDF file to upload (max 25MB)',
+          })
+        ),
+        data: t.String({
+          description:
+            '{ documentName: string, documentUrl: string, status: number }',
+        }),
       }),
       detail: ProjectDocumentSwaggerDetail(
         'Update Project Document',

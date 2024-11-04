@@ -185,7 +185,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
           })
         ),
       }),
-      detail: projectSwaggerDetail('Update a project', 'Update a project'),
+      detail: projectSwaggerDetail('Get project', 'Get project by ID'),
     }
   )
   .patch(
