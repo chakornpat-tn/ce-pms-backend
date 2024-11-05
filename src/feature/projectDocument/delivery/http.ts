@@ -12,7 +12,7 @@ const projectDocumentUsecase = ProjectDocumentUsecase
 
 const ProjectDocumentSwaggerDetail = (summary: string, detail: string) => {
   return {
-    tags: ['ProjectDocument'],
+    tags: ['Project Document'],
     summary: summary,
     detail: detail,
   }
@@ -276,3 +276,4 @@ export const ProjectDocumentDelivery = new Elysia({
       ),
     }
   )
+ 
