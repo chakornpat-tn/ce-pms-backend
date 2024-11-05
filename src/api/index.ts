@@ -6,6 +6,7 @@ import { ProjectStatusDelivery } from '@/feature/projectStatus/delivery/http'
 import { CommentDelivery } from '@/feature/comment/delivery/http'
 import { DocumentDelivery } from '@/feature/document/delivery/http'
 import { ProjectDocumentDelivery } from '@/feature/projectDocument/delivery/http'
+import { ProjectUserDelivery } from '@/feature/projectUser/delivery/http'
 
 import * as utils from '@/utils'
 
@@ -16,10 +17,12 @@ const app = new Elysia()
       .use(AuthDelivery)
       .use(UserDelivery)
       .use(ProjectDelivery)
-      .use(DocumentDelivery)
-      .use(CommentDelivery)
       .use(ProjectDocumentDelivery)
       .use(ProjectStatusDelivery)
+      .use(ProjectUserDelivery)
+      .use(DocumentDelivery)
+      .use(CommentDelivery)
+      
   )
   .onError(({ code, error }) => {
     switch (code) {

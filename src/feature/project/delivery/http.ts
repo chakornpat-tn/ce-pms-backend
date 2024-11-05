@@ -153,7 +153,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
     '/:id',
     async ({ params, set }) => {
       try {
-        const projectId = parseInt(params.id)
+        const projectId = params.id
         const project = await projectUsecase.GetProjectById(projectId)
         if (!project) {
           set.status = 404
@@ -177,15 +177,10 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
       }
     },
     {
-      body: t.Object({
-        projects: t.Array(
-          t.Object({
-            id: t.Number(),
-            projectStatusId: t.Optional(t.Number()),
-          })
-        ),
+      params: t.Object({
+        id: t.Number(),
       }),
-      detail: projectSwaggerDetail('Update a project', 'Update a project'),
+      detail: projectSwaggerDetail('Get project', 'Get project by ID'),
     }
   )
   .patch(

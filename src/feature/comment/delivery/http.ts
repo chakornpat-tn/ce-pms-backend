@@ -69,7 +69,10 @@ export const CommentDelivery = new Elysia({ prefix: '/comment' })
       params: t.Object({
         id: t.Number(),
       }),
-      detail: commentSwaggerDetail('Delete Comment', 'Delete a comment by id'),
+      detail: commentSwaggerDetail(
+        'Get Comment',
+        'Get Comment By ID',
+      ),
     }
   )
   .get(
