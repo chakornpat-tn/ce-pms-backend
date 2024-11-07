@@ -127,7 +127,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
     {
       query: t.Object({
         academicYear: t.Number(),
-        semester: t.Number(),
+        semester: t.Optional(t.Number()),
         projectStatus: t.Optional(t.String()),
         projectName: t.Optional(t.String()),
         courseStatus: t.Optional(t.String()),
