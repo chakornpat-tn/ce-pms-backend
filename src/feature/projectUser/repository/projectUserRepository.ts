@@ -66,6 +66,7 @@ export class ProjectUserRepository {
       },
       select: {
         id: true,
+        username:true,
         projectName: true,
         projectNameEng: true,
         projectStatus: true,
