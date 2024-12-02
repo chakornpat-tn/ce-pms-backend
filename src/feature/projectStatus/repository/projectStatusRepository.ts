@@ -38,6 +38,7 @@ export class ProjectStatusRepository {
         textColor: true,
         bgColor: true,
         isActive: true,
+        course:true
       },
     })
   }
