@@ -195,6 +195,7 @@ export class ProjectRepository {
         },
         users: {
           select: {
+            userProjectRole:true,
             user: {
               select: {
                 id: true,
@@ -203,6 +204,7 @@ export class ProjectRepository {
             },
           },
         },
+        courseStatus:true,
         projectStatus: {
           select: {
             id: true,
