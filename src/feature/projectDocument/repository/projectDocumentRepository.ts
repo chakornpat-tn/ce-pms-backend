@@ -31,6 +31,9 @@ export class ProjectDocumentRepository {
           select: commentSelect,
         },
       },
+      orderBy: {
+        updatedAt: 'desc'
+      }
     })
   }
 

@@ -6,11 +6,13 @@ export const checkAuthorization = async ({
   jwt,
   bearer,
 }: Context & { jwt: any; bearer: any }) => {
-  if (!bearer) {
+  if (!bearer || !jwt) {
     set.status = 401
     return utils.ErrorMessage('Authorization', 'unauthorized.')
   }
-  if (!jwt) {
+
+  const payload = await jwt.verify(bearer)
+  if (!payload) {
     set.status = 401
     return utils.ErrorMessage('Authorization', 'unauthorized.')
   }
