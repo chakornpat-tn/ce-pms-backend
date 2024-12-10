@@ -2,7 +2,7 @@ import Elysia, { t } from 'elysia'
 import bearer from '@elysiajs/bearer'
 import { ProjectDocument } from '@prisma/client'
 import { ProjectDocumentUsecase } from '../usercase/projectDocumentUsecase'
-import { ProjectDocumentRequest } from '@/models/ProjectDocument'
+import { CreateProjectDocument, ProjectDocumentRequest } from '@/models/ProjectDocument'
 import * as fs from 'fs/promises'
 import * as middleWare from '@/middleware'
 import * as utils from '@/utils'
@@ -34,7 +34,11 @@ export const ProjectDocumentDelivery = new Elysia({
       const gcs = utils.GCS
       try {
         const req = body as ProjectDocumentRequest
-        const data = JSON.parse(req.data) as ProjectDocument
+        const data = JSON.parse(req.data) as CreateProjectDocument
+        if(req.commentIDs) {
+          const commentIDs = req.commentIDs.split(',').map(Number)
+          data.commentIDs = commentIDs
+        }
 
         if (!req.document.type.includes('pdf')) {
           set.status = 400
@@ -81,6 +85,9 @@ export const ProjectDocumentDelivery = new Elysia({
           description:
             'JSON string containing project document {projectId: number, documentIdn: number, documentName: string } ',
         }),
+        commentIDs: t.String({
+            description: 'Comment IDs have edit in docs',
+          })
       }),
       detail: ProjectDocumentSwaggerDetail(
         'Create Project Document',

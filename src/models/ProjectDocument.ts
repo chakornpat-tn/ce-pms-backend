@@ -12,4 +12,12 @@ type ProjectDocument = {
 export type ProjectDocumentRequest = {
   document: File
   data: string
+  commentIDs: string
+}
+export type CreateProjectDocument = {
+  projectId: number
+  documentId: number
+  documentName: string
+  documentUrl: string
+  commentIDs?: number[]
 }

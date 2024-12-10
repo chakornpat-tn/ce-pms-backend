@@ -1,10 +1,11 @@
+import { CreateProjectDocument } from '@/models/ProjectDocument'
 import { ProjectDocumentRepository } from '../repository/projectDocumentRepository'
 import { ProjectDocument } from '@prisma/client'
 
 const projectDocumentRepo = ProjectDocumentRepository
 
 export class ProjectDocumentUsecase {
-  static CreateProjectDocument = async (req: ProjectDocument) => {
+  static CreateProjectDocument = async (req: CreateProjectDocument) => {
     return await projectDocumentRepo.CreateProjectDocument(req)
   }
 

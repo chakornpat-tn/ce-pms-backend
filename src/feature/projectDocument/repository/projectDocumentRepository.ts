@@ -1,3 +1,4 @@
+import { CreateProjectDocument } from '@/models/ProjectDocument'
 import { PrismaClient, ProjectDocument } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -32,8 +33,8 @@ export class ProjectDocumentRepository {
         },
       },
       orderBy: {
-        updatedAt: 'desc'
-      }
+        updatedAt: 'desc',
+      },
     })
   }
 
@@ -53,17 +54,35 @@ export class ProjectDocumentRepository {
     })
   }
 
-  static CreateProjectDocument = async (projectDocument: ProjectDocument) => {
-    return await prisma.projectDocument.create({
-      data: {
-        projectId: projectDocument.projectId,
-        documentId: projectDocument.documentId,
-        documentName: projectDocument.documentName,
-        documentUrl: projectDocument.documentUrl,
-      },
+  static CreateProjectDocument = async (
+    projectDocument: CreateProjectDocument
+  ) => {
+    return await prisma.$transaction(async (tx) => {
+      const newProjectDocs = await tx.projectDocument.create({
+        data: {
+          projectId: projectDocument.projectId,
+          documentId: projectDocument.documentId,
+          documentName: projectDocument.documentName,
+          documentUrl: projectDocument.documentUrl,
+        },
+      })
+
+      if (projectDocument.commentIDs) {
+        await tx.comment.updateMany({
+          where: {
+            id: {
+              in: projectDocument.commentIDs,
+            },
+          },
+          data: {
+            projectDocumentEditId: newProjectDocs.id,
+          },
+        })
+      }
+
+      return newProjectDocs
     })
   }
-
   static UpdateProjectDocument = async (projectDocument: ProjectDocument) => {
     const record = await prisma.projectDocument.findFirst({
       where: {

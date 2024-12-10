@@ -12,16 +12,12 @@ export class CommentUsecase {
   static GetCommentByID = (id: number) => {
     return commentRepo.GetCommentByID(id)
   }
-    static ListComment = (
-      projectDocumentId?: number,
-      projectDocumentEditId?: number 
-    ) => {
-      return commentRepo.ListComment(
-        projectDocumentId,
-        projectDocumentEditId 
-      
-      )
-    }
+  static ListComment = (
+    projectDocumentId?: number,
+    projectDocumentEditId?: number
+  ) => {
+    return commentRepo.ListComment(projectDocumentId, projectDocumentEditId)
+  }
 
   static UpdateComments = (req: UpdateCommentsRequest) => {
     return commentRepo.UpdateComments(req)
@@ -29,5 +25,12 @@ export class CommentUsecase {
 
   static DeleteComment = (id: number) => {
     return commentRepo.DeleteComment(id)
+  }
+
+  static GetCommentsByProjectAndDocument = (
+    projectId: number,
+    documentId: number
+  ) => {
+    return commentRepo.GetCommentsByProjectAndDocument(projectId, documentId)
   }
 }

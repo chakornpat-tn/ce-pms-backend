@@ -49,6 +49,34 @@ export const CommentDelivery = new Elysia({ prefix: '/comment' })
     }
   )
   .get(
+    '/get-by-project-document-id',
+    async ({ query, set }) => {
+      try {
+        const { projectId, documentId } = query
+        const comment = await commentUsecase.GetCommentsByProjectAndDocument(
+          projectId,
+          documentId
+        )
+        return utils.SuccessMessage(
+          title,
+          'get comment by project and document id success.',
+          comment
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Get Comment By Project And Document Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'get comment by project and document error.')
+      }
+    },
+    {
+      query: t.Object({
+        projectId: t.Number(),
+        documentId: t.Number(),
+      }),
+      detail: commentSwaggerDetail('Get Comment by Project And Doc ID', 'Get Comment by Project And Doc ID'),
+    }
+  )
+  .get(
     '/:id',
     async ({ params, set }) => {
       try {
@@ -69,10 +97,7 @@ export const CommentDelivery = new Elysia({ prefix: '/comment' })
       params: t.Object({
         id: t.Number(),
       }),
-      detail: commentSwaggerDetail(
-        'Get Comment',
-        'Get Comment By ID',
-      ),
+      detail: commentSwaggerDetail('Get Comment', 'Get Comment By ID'),
     }
   )
   .get(

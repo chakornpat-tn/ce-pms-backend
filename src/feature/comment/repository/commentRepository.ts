@@ -51,4 +51,33 @@ export class CommentRepository {
       },
     })
   }
-}
+
+  static async GetCommentsByProjectAndDocument(
+    projectId: number,
+    documentId: number,
+  ) {
+    const projectDocuments = await prisma.projectDocument.findMany({
+      select: {
+        id: true,
+      },
+      where: {
+        projectId: projectId,
+        documentId: documentId,
+      },
+    })
+
+    return prisma.comment.findMany({
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: {
+        projectDocumentEditId: null,
+        projectDocumentId: {
+          in: projectDocuments.map(doc => doc.id),
+        },
+      },
+    })
+  }}
