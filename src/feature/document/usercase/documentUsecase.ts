@@ -20,4 +20,9 @@ export class DocumentUsecase {
   static DeleteDocument = async (id: number) => {
     return await documentRepo.DeleteDocument(id)
   }
+
+  static ListDocumentByProjectID = async (projectId: number) => {
+    return await documentRepo.ListDocumentByProjectID(projectId)
+  }
+  
 }

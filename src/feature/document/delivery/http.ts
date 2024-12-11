@@ -23,6 +23,21 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
   .guard({
     beforeHandle: middleWare.checkAuthorization,
   })
+  .get('/in-project/:projectId', async ({ params, set }) => {
+    try {
+      const projectId = Number(params.projectId)
+      const documents = await documentUsecase.ListDocumentByProjectID(projectId)
+      return utils.SuccessMessage(
+        title,
+        'List document successfully.',
+        documents
+      )
+    } catch (error) {
+      utils.logger.warn(error, 'List Document By Project ID Controller Error')
+      set.status = 500
+      return utils.ErrorMessage(title, 'List document error.')
+    }
+  })
   .post(
     '/',
     async ({ body, set }) => {
@@ -45,7 +60,6 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
         isActive: t.Optional(t.Boolean()),
       }),
       detail: DocumentSwaggerDetail('Create Document', 'Create a new document'),
-      
     }
   )
   .get(
@@ -89,7 +103,6 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
         'List Documents',
         'Get a list of all documents with optional filters'
       ),
-      
     }
   )
   .put(
@@ -122,7 +135,6 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
         'Update Documents',
         'Update multiple documents with new information'
       ),
-      
     }
   )
 
@@ -148,6 +160,5 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
         'Delete Document',
         'Delete a document by its ID'
       ),
-      
     }
   )

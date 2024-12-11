@@ -80,4 +80,28 @@ export class DocumentRepository {
 
     return deletedDocument
   }
+
+  static ListDocumentByProjectID = async (projectId: number) => {
+    const documents = await prisma.$transaction(async (tx) => {
+      const docsIDs = await tx.projectDocument.findMany({
+        where: {
+          projectId: projectId,
+        },
+        select: {
+          documentId: true,
+        },
+        distinct: ['documentId'],
+      })
+
+      return await tx.document.findMany({
+        where: {
+          id: {
+            in: docsIDs.map((doc) => doc.documentId),
+          },
+        },
+      })
+    })
+
+    return documents
+  }
 }
