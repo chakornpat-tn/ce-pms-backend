@@ -85,14 +85,13 @@ export const ProjectDocumentDelivery = new Elysia({
           description:
             'JSON string containing project document {projectId: number, documentIdn: number, documentName: string } ',
         }),
-        commentIDs: t.String({
+        commentIDs: t.Optional(t.String({
             description: 'Comment IDs have edit in docs',
-          })
+          }))
       }),
       detail: ProjectDocumentSwaggerDetail(
         'Create Project Document',
-        'Upload a new PDF document (max 25MB) and create a project document record with associated metadata'
-      ),
+        'Upload a new PDF document (max 25MB) and create a project document record with associated metadata'      ),
     }
   )
   .get(
