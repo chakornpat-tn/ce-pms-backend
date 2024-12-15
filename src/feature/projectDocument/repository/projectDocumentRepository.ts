@@ -33,7 +33,7 @@ export class ProjectDocumentRepository {
         },
       },
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
     })
   }
