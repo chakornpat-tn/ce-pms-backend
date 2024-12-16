@@ -195,7 +195,7 @@ export class ProjectRepository {
         },
         users: {
           select: {
-            userProjectRole:true,
+            userProjectRole: true,
             user: {
               select: {
                 id: true,
@@ -204,7 +204,7 @@ export class ProjectRepository {
             },
           },
         },
-        courseStatus:true,
+        courseStatus: true,
         projectStatus: {
           select: {
             id: true,
@@ -260,6 +260,7 @@ export class ProjectRepository {
           bgColor: true,
         },
       },
+      courseStatus: true,
     }
 
     return await prisma.project.findMany({
