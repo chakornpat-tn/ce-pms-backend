@@ -33,4 +33,11 @@ export class ProjectUserUsecase {
     const projects = await projectUserRepo.GetProjectByIDs(projectIDs)
     return projects
   }
+
+  static GetProjectInCommitteeByUserID = async (
+    userId: number,
+    filter: ListProjectsFilter
+  ) => {
+    return await projectUserRepo.GetProjectInCommitteeByUserID(userId, filter)
+  }
 }

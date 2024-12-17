@@ -1,6 +1,7 @@
 import { ProjectUser, PrismaClient } from '@prisma/client'
 import { ListProjectsFilter } from '@/models/Project'
 import { UpdateProjectUserRequest } from '@/models/ProjectUser'
+import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
 
 const prisma = new PrismaClient()
 
@@ -41,6 +42,9 @@ export class ProjectUserRepository {
         users: {
           some: {
             userId,
+            userProjectRole: {
+              not: userProjectRole.COMMITTEE,
+            },
           },
         },
         ...(req.academicYear !== undefined && {
@@ -66,7 +70,7 @@ export class ProjectUserRepository {
       },
       select: {
         id: true,
-        username:true,
+        username: true,
         projectName: true,
         projectNameEng: true,
         projectStatus: true,
@@ -81,7 +85,6 @@ export class ProjectUserRepository {
 
     return projects
   }
-
   static GetProjectUSer = async (projectId: number, userId: number) => {
     return prisma.projectUser.findUnique({
       where: {
@@ -164,5 +167,89 @@ export class ProjectUserRepository {
         updatedAt: true,
       },
     })
+  }
+
+  static GetProjectInCommitteeByUserID = async (
+    userID: number,
+    filter: ListProjectsFilter
+  ) => {
+    const projectIDsInCommittee = await prisma.projectUser.findMany({
+      where: {
+        userId: userID,
+        userProjectRole: userProjectRole.COMMITTEE,
+      },
+      select: {
+        projectId: true,
+      },
+    })
+
+    const { academicYear, semester, projectName, projectStatus, courseStatus } =
+      filter
+
+    const projects = await prisma.project.findMany({
+      where: {
+        AND: [
+          {
+            id: {
+              in: projectIDsInCommittee.map((item) => item.projectId),
+            },
+          },
+          ...(academicYear ? [{ academicYear }] : []),
+          ...(semester ? [{ semester }] : []),
+          ...(projectName
+            ? [
+                {
+                  projectName: {
+                    contains: projectName,
+                    mode: 'insensitive' as const,
+                  },
+                },
+              ]
+            : []),
+          ...(projectStatus
+            ? [
+                {
+                  projectStatusId: {
+                    in: projectStatus,
+                  },
+                },
+              ]
+            : []),
+          ...(courseStatus
+            ? [
+                {
+                  courseStatus: {
+                    in: courseStatus,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      select: {
+        id: true,
+        username: true,
+        projectName: true,
+        abstract: true,
+        semester: true,
+        academicYear: true,
+        type: true,
+        createdAt: true,
+        updatedAt: true,
+        projectStatus: {
+          select: {
+            id: true,
+            name: true,
+            textColor: true,
+            bgColor: true,
+          },
+        },
+        courseStatus: true,
+      },
+    })
+    return projects
   }
 }

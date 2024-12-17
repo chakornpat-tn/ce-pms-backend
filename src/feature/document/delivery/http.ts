@@ -37,6 +37,15 @@ export const DocumentDelivery = new Elysia({ prefix: '/document' })
       set.status = 500
       return utils.ErrorMessage(title, 'List document error.')
     }
+  },
+  {
+    params: t.Object({
+      projectId: t.Number(),
+    }),
+    detail: DocumentSwaggerDetail(
+      'List Documents by Project',
+      'Get a list of documents for a specific project'
+    ),
   })
   .post(
     '/',

@@ -27,6 +27,64 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
   .guard({
     beforeHandle: middleWare.checkAuthorization,
   })
+    .get(
+    '/committee/:userId',
+    async ({ params, set, query }) => {
+      try {
+        const userId = params.userId
+        const req: ListProjectsFilter = {
+          academicYear: query.academicYear,
+          semester: query.semester,
+          projectStatus: query.projectStatus
+            ? query.projectStatus.split(',').map(Number)
+            : undefined,
+          projectName: query.projectName || undefined,
+          courseStatus: query.courseStatus
+            ? query.courseStatus.split(',').map(Number)
+            : undefined,
+        }
+
+        const projects = await projectUserUsecase.GetProjectInCommitteeByUserID(userId, req)
+
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          'Get project in committee success.',
+          projects
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Get Project In Committee By User ID Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Get Project In Committee By User ID Error.')
+      }
+    },
+    {
+      params: t.Object({
+        userId: t.Number(),
+      }),
+      query: t.Object({
+        academicYear: t.Optional(t.Number()),
+        semester: t.Optional(t.Number()),
+        projectName: t.Optional(t.String()),
+        projectStatus: t.Optional(
+          t.String({
+            detail:
+              'Array of project status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
+          })
+        ),
+        courseStatus: t.Optional(
+          t.String({
+            detail:
+              'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
+          })
+        ),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Get Project In Committee By User ID',
+        'Get project in committee by user ID'
+      ),
+    }
+  )
   .get(
     '/in-complete-users',
     async ({ set, query }) => {
