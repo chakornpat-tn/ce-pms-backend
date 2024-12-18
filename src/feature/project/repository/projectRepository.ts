@@ -176,12 +176,18 @@ export class ProjectRepository {
         id: true,
         username: true,
         projectName: true,
+        projectNameEng: true,
         abstract: true,
+        abstractEng: true,
+        detail: true,
+        detailEng: true,
         semester: true,
         academicYear: true,
         type: true,
+        projectStatusId: true,
         createdAt: true,
         updatedAt: true,
+        examDateTime: true,
         students: {
           select: {
             student: {
@@ -192,8 +198,7 @@ export class ProjectRepository {
               },
             },
           },
-        },
-        users: {
+        },        users: {
           select: {
             userProjectRole: true,
             user: {
