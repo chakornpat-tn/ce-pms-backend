@@ -39,9 +39,11 @@ model Project {
   createdAt       DateTime          @default(now()) @map("created_at")
   updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
   examDateTime    DateTime?         @map("exam_date_time")
+  examLocation    String?           @map("exam_location")
   documents       ProjectDocument[] @relation("ProjectDocument")
   students        ProjectStudent[]  @relation("ProjectStudent")
   users           ProjectUser[]     @relation("ProjectUser")
+  progressReports ProgressReport[]  @relation("ProjectProgressReport")
   projectStatus   ProjectStatus?    @relation(fields: [projectStatusId], references: [id])
 
   @@map("projects")
@@ -100,9 +102,11 @@ model ProjectStudent {
 model ProjectUser {
   projectId       Int     @map("project_id")
   userId          Int     @map("user_id")
+  prepDocs        String? @map("prep_docs")
+  projectDocs     String? @map("project_docs")
+  projectPoint    String? @map("project_point")
+  prepPoint       String? @map("prep_point")
   userProjectRole Int     @map("user_project_role")
-  projectDocs     String? @map("project_docs") @db.Text
-  prepDocs        String? @map("prep_docs") @db.Text
   project         Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
   user            User    @relation(fields: [userId], references: [id])
 
@@ -115,7 +119,7 @@ model ProjectDocument {
   projectId         Int       @map("project_id")
   documentId        Int       @map("document_id")
   documentName      String    @map("document_name")
-  documentUrl       String    @map("document_url") @db.Text
+  documentUrl       String    @map("document_url")
   status            Int       @default(1) @map("status")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
@@ -135,7 +139,23 @@ model Comment {
   createdAt             DateTime         @default(now()) @map("created_at")
   updatedAt             DateTime         @default(now()) @updatedAt @map("updated_at")
   ProjectDocumentEdit   ProjectDocument? @relation("ProjectDocumentCommenBasedEdits", fields: [projectDocumentEditId], references: [id])
-  ProjectDocument       ProjectDocument? @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])
+  ProjectDocument       ProjectDocument  @relation("ProjectDocumentComments", fields: [projectDocumentId], references: [id])
 
   @@map("comments")
+}
+
+model ProgressReport {
+  id              Int      @id @default(autoincrement()) @map("id")
+  report          Json?    @map("report")
+  reportResult    Json?    @map("report_result")
+  productProgress Int      @map("product_progress")
+  productUrl      String?  @map("product_url") @db.Text
+  docsProgress    Int      @map("docs_progress")
+  docsUrl         String?  @map("docs_url") @db.Text
+  createAt        DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+  projectId       Int      @map("project_id")
+  project         Project  @relation("ProjectProgressReport", fields: [projectId], references: [id])
+
+  @@map("progress_reports")
 }
