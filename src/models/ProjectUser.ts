@@ -1,9 +1,11 @@
 export type ProjectUser = {
   projectId: number
   userId: number
-  userProjectRole?: number
-  projectDocs?: string | null
   prepDocs?: string | null
+  projectDocs?: string | null
+  projectPoint?: number | null
+  prepPoint?: number | null
+  userProjectRole?: number
 }
 
 export type ProjectUserUploadRequest = {
@@ -15,7 +17,9 @@ export type ProjectUserUploadRequest = {
 export type UpdateProjectUserRequest = {
   projectId: number
   userId: number
+  prepDocs?: string | null
+  projectDocs?: string | null
+  projectPoint?: number | null
+  prepPoint?: number | null
   userProjectRole?: number
-  projectDocs?: string 
-  prepDocs?: string 
 }
