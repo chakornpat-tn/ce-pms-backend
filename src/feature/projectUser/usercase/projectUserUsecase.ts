@@ -40,4 +40,8 @@ export class ProjectUserUsecase {
   ) => {
     return await projectUserRepo.GetProjectInCommitteeByUserID(userId, filter)
   }
+
+  static CheckStatusRegisExamDateTime = async(projectID:number) => {
+    return await projectUserRepo.CheckStatusRegisExamDateTime(projectID)
+  }
 }

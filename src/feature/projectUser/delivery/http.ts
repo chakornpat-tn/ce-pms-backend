@@ -27,7 +27,42 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
   .guard({
     beforeHandle: middleWare.checkAuthorization,
   })
-    .get(
+  .get(
+    '/check-regis-exam-date/:projectId',
+    async ({ params, set }) => {
+      try {
+        const projectId = params.projectId
+
+        const res = await projectUserUsecase.CheckStatusRegisExamDateTime(
+          projectId
+        )
+
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          'Get Status Regis Exam Date Time Success.',
+          res
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Get Status Regis Exam Date Time Error.')
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'Get Status Regis Exam Date Time Error.'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        projectId: t.Number(),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Get Status Regis Exam Date Time',
+        'Get Status Regis Exam Date Time'
+      ),
+    }
+  )
+  .get(
     '/committee/:userId',
     async ({ params, set, query }) => {
       try {
@@ -44,7 +79,10 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
             : undefined,
         }
 
-        const projects = await projectUserUsecase.GetProjectInCommitteeByUserID(userId, req)
+        const projects = await projectUserUsecase.GetProjectInCommitteeByUserID(
+          userId,
+          req
+        )
 
         set.status = 200
         return utils.SuccessMessage(
@@ -53,9 +91,15 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
           projects
         )
       } catch (error) {
-        utils.logger.warn(error, 'Get Project In Committee By User ID Controller Error')
+        utils.logger.warn(
+          error,
+          'Get Project In Committee By User ID Controller Error'
+        )
         set.status = 500
-        return utils.ErrorMessage(title, 'Get Project In Committee By User ID Error.')
+        return utils.ErrorMessage(
+          title,
+          'Get Project In Committee By User ID Error.'
+        )
       }
     },
     {

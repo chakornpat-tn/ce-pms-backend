@@ -2,6 +2,7 @@ import { ProjectUser, PrismaClient } from '@prisma/client'
 import { ListProjectsFilter } from '@/models/Project'
 import { UpdateProjectUserRequest } from '@/models/ProjectUser'
 import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
+import courseStatus from '@/statics/constants/course/courseStatus'
 
 const prisma = new PrismaClient()
 
@@ -251,5 +252,30 @@ export class ProjectUserRepository {
       },
     })
     return projects
+  }
+
+  static CheckStatusRegisExamDateTime = async (projectID: number) => {
+    const projectExists = await prisma.project.findFirst({
+      where: {
+        id: projectID,
+        OR: [
+          { courseStatus: courseStatus.ApprovePreExam },
+          { courseStatus: courseStatus.ApproveProjectExam },
+        ],
+      },
+    })
+
+    const projectUsersCount = await prisma.projectUser.count({
+      where: {
+        projectId: projectID,
+      },
+    })
+
+    const result = {
+      projectExamApprove: !!projectExists,
+      projectCommitteeCountApprove: projectUsersCount === 3,
+    }
+
+    return result
   }
 }
