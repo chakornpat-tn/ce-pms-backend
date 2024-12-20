@@ -40,10 +40,10 @@ model Project {
   updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
   examDateTime    DateTime?         @map("exam_date_time")
   examLocation    String?           @map("exam_location")
+  progressReports ProgressReport[]  @relation("ProjectProgressReport")
   documents       ProjectDocument[] @relation("ProjectDocument")
   students        ProjectStudent[]  @relation("ProjectStudent")
   users           ProjectUser[]     @relation("ProjectUser")
-  progressReports ProgressReport[]  @relation("ProjectProgressReport")
   projectStatus   ProjectStatus?    @relation(fields: [projectStatusId], references: [id])
 
   @@map("projects")
@@ -104,9 +104,9 @@ model ProjectUser {
   userId          Int     @map("user_id")
   prepDocs        String? @map("prep_docs")
   projectDocs     String? @map("project_docs")
-  projectPoint    String? @map("project_point")
-  prepPoint       String? @map("prep_point")
   userProjectRole Int     @map("user_project_role")
+  prepPoint       Int?    @map("prep_point")
+  projectPoint    Int?    @map("project_point")
   project         Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
   user            User    @relation(fields: [userId], references: [id])
 
@@ -149,9 +149,9 @@ model ProgressReport {
   report          Json?    @map("report")
   reportResult    Json?    @map("report_result")
   productProgress Int      @map("product_progress")
-  productUrl      String?  @map("product_url") @db.Text
+  productUrl      String?  @map("product_url")
   docsProgress    Int      @map("docs_progress")
-  docsUrl         String?  @map("docs_url") @db.Text
+  docsUrl         String?  @map("docs_url")
   createAt        DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
   projectId       Int      @map("project_id")
