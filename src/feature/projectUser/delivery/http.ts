@@ -133,7 +133,6 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     '/in-complete-users/:userId',
     async ({ set, query, params }) => {
       try {
-
         const filter: ListProjectsFilter = {
           academicYear: query.academicYear,
           semester: query.semester,
@@ -144,7 +143,10 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         }
 
         const projects =
-          await projectUserUsecase.GetProjectsWithIncompleteUsers(filter, params.userId)
+          await projectUserUsecase.GetProjectsWithIncompleteUsers(
+            filter,
+            params.userId
+          )
 
         set.status = 200
         return utils.SuccessMessage(
@@ -176,7 +178,8 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         'List project with incomplete users'
       ),
     }
-  )  .post(
+  )
+  .post(
     '/',
     async ({ body, set }) => {
       try {
@@ -312,10 +315,10 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
 
         await projectUserUsecase.UpdateProjectUser(data)
 
-        if (req.prepDocs && existingDocs.prepDocs)
-          await gcs.DeleteFile(existingDocs.prepDocs)
-        else if (req.projectDocs && existingDocs.projectDocs)
-          await gcs.DeleteFile(existingDocs.projectDocs)
+        // if (req.prepDocs && existingDocs.prepDocs)
+        //   await gcs.DeleteFile(existingDocs.prepDocs)
+        // else if (req.projectDocs && existingDocs.projectDocs)
+        //   await gcs.DeleteFile(existingDocs.projectDocs)
 
         if (tempFilePath) await fs.rm(tempFilePath)
 
@@ -410,6 +413,39 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
       detail: ProjectUserSwaggerDetail(
         'List Project User',
         'List project user by userId'
+      ),
+    }
+  )
+  .get(
+    '/detail',
+    async ({ set, query }) => {
+      try {
+        const userId = query.userId
+        const projectId = query.projectId
+        const projectUser = await projectUserUsecase.GetProjectUserDetail(
+          projectId,
+          userId
+        )
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          'get project user detail success.',
+          projectUser
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Get Project User Detail Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Get project user detail error.')
+      }
+    },
+    {
+      query: t.Object({
+        userId: t.Optional(t.Number()),
+        projectId: t.Optional(t.Number()),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Get Project User Detail',
+        'Get project user detail by userId and projectId'
       ),
     }
   )
