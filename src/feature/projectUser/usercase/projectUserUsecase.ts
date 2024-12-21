@@ -47,4 +47,7 @@ export class ProjectUserUsecase {
   static CheckStatusRegisExamDateTime = async (projectID: number) => {
     return await projectUserRepo.CheckStatusRegisExamDateTime(projectID)
   }
+  static GetProjectUserDetail = async (projectId?: number, userId?: number) => {
+    return await projectUserRepo.GetProjectUserDetail(projectId, userId)
+  }
 }
