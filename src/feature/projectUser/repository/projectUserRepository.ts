@@ -126,12 +126,23 @@ export class ProjectUserRepository {
 
     return res
   }
-  static GetProjectByIDs = async (projectIds: number[]) => {
+  static GetProjectByIDs = async (projectIds: number[], userId: number) => {
     return prisma.project.findMany({
       where: {
-        id: {
-          in: projectIds,
-        },
+        AND: [
+          {
+            id: {
+              in: projectIds,
+            },
+          },
+          {
+            users: {
+              none: {
+                userId: userId,
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -141,10 +152,11 @@ export class ProjectUserRepository {
         abstractEng: true,
         users: {
           select: {
+            userId: true,
+            userProjectRole: true,
             user: {
               select: {
                 name: true,
-                role: true,
               },
             },
           },

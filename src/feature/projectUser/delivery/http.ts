@@ -130,9 +130,10 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     }
   )
   .get(
-    '/in-complete-users',
-    async ({ set, query }) => {
+    '/in-complete-users/:userId',
+    async ({ set, query, params }) => {
       try {
+
         const filter: ListProjectsFilter = {
           academicYear: query.academicYear,
           semester: query.semester,
@@ -143,7 +144,7 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         }
 
         const projects =
-          await projectUserUsecase.GetProjectsWithIncompleteUsers(filter)
+          await projectUserUsecase.GetProjectsWithIncompleteUsers(filter, params.userId)
 
         set.status = 200
         return utils.SuccessMessage(
@@ -161,6 +162,9 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
       }
     },
     {
+      params: t.Object({
+        userId: t.Number(),
+      }),
       query: t.Object({
         academicYear: t.Number(),
         semester: t.Optional(t.Number()),
@@ -172,8 +176,7 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         'List project with incomplete users'
       ),
     }
-  )
-  .post(
+  )  .post(
     '/',
     async ({ body, set }) => {
       try {

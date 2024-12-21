@@ -26,11 +26,14 @@ export class ProjectUserUsecase {
     return await projectUserRepo.GetProjectUSer(projectId, userId)
   }
 
-  static GetProjectsWithIncompleteUsers = async (req: ListProjectsFilter) => {
+  static GetProjectsWithIncompleteUsers = async (
+    req: ListProjectsFilter,
+    userId: number
+  ) => {
     const incompleteProject =
       await projectUserRepo.GetProjectsWithIncompleteUsers(req)
     const projectIDs = incompleteProject.map((item) => item.projectId)
-    const projects = await projectUserRepo.GetProjectByIDs(projectIDs)
+    const projects = await projectUserRepo.GetProjectByIDs(projectIDs,userId)
     return projects
   }
 
@@ -41,7 +44,7 @@ export class ProjectUserUsecase {
     return await projectUserRepo.GetProjectInCommitteeByUserID(userId, filter)
   }
 
-  static CheckStatusRegisExamDateTime = async(projectID:number) => {
+  static CheckStatusRegisExamDateTime = async (projectID: number) => {
     return await projectUserRepo.CheckStatusRegisExamDateTime(projectID)
   }
 }
