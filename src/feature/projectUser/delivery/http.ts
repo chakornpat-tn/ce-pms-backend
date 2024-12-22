@@ -409,6 +409,8 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
               'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
           })
         ),
+        projectAcademicYear: t.Optional(t.Number()),
+        projectSemester: t.Optional(t.Number()),
       }),
       detail: ProjectUserSwaggerDetail(
         'List Project User',

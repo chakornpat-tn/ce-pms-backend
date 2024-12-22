@@ -126,11 +126,13 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
     },
     {
       query: t.Object({
-        academicYear: t.Number(),
+        academicYear: t.Optional(t.Number()),
         semester: t.Optional(t.Number()),
         projectStatus: t.Optional(t.String()),
         projectName: t.Optional(t.String()),
         courseStatus: t.Optional(t.String()),
+        projectSemester: t.Optional(t.Number()),
+        projectAcademicYear: t.Optional(t.Number()),
       }),
       detail: {
         ...projectSwaggerDetail(
@@ -215,6 +217,8 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         detailEng: t.Optional(t.String()),
         semester: t.Optional(t.Number()),
         academicYear: t.Optional(t.Number()),
+        projectSemester: t.Optional(t.Number()),
+        projectAcademicYear: t.Optional(t.Number()),
         type: t.Optional(t.Union([t.String(), t.Null()])),
         projectStatusId: t.Optional(t.Union([t.Number(), t.Null()])),
         courseStatus: t.Optional(t.Number()),
@@ -262,6 +266,8 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         projectStatusId: t.Optional(t.Union([t.Number(), t.Null()])),
         semester: t.Optional(t.Number()),
         academicYear: t.Optional(t.Number()),
+        projectSemester: t.Optional(t.Number()),
+        projectAcademicYear: t.Optional(t.Number()),
         type: t.Optional(t.Union([t.String(), t.Null()])),
       }),
       detail: projectSwaggerDetail(

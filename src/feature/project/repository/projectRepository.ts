@@ -73,8 +73,14 @@ export class ProjectRepository {
             projectName: projectData.projectName,
           }),
           ...(projectData.semester && { semester: projectData.semester }),
+          ...(projectData.projectSemester && {
+            projectSemester: projectData.projectSemester,
+          }),
           ...(projectData.academicYear && {
             academicYear: projectData.academicYear,
+          }),
+          ...(projectData.projectAcademicYear && {
+            projectAcademicYear: projectData.projectAcademicYear,
           }),
           ...(projectData.password && { password: projectData.password }),
           ...(projectData.projectNameEng && {
@@ -148,6 +154,12 @@ export class ProjectRepository {
       ...(projectData.academicYear !== undefined && {
         academicYear: projectData.academicYear,
       }),
+      ...(projectData.projectSemester !== undefined && {
+        projectSemester: projectData.projectSemester,
+      }),
+      ...(projectData.projectAcademicYear !== undefined && {
+        projectAcademicYear: projectData.projectAcademicYear,
+      }),
       ...(projectData.type !== undefined && { type: projectData.type }),
     }
 
@@ -198,7 +210,8 @@ export class ProjectRepository {
               },
             },
           },
-        },        users: {
+        },
+        users: {
           select: {
             userProjectRole: true,
             user: {
@@ -223,8 +236,15 @@ export class ProjectRepository {
   }
 
   static ListProjects = async (filter: ListProjectsFilter) => {
-    const { academicYear, semester, projectName, projectStatus, courseStatus } =
-      filter
+    const {
+      academicYear,
+      semester,
+      projectName,
+      projectStatus,
+      courseStatus,
+      projectSemester,
+      projectAcademicYear,
+    } = filter
 
     const whereConditions = {
       ...(academicYear && { academicYear }),
@@ -245,6 +265,8 @@ export class ProjectRepository {
           in: courseStatus,
         },
       }),
+      ...(projectSemester && { projectSemester: projectSemester }),
+      ...(projectAcademicYear && { projectAcademicYear: projectAcademicYear }),
     }
 
     const selectFields = {

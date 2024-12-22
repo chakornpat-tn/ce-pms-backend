@@ -68,6 +68,12 @@ export class ProjectUserRepository {
             in: req.courseStatus,
           },
         }),
+        ...(req.projectSemester && {
+          projectSemester: req.projectSemester,
+        }),
+        ...(req.projectAcademicYear && {
+          projectAcademicYear: req.projectAcademicYear,
+        }),
       },
       select: {
         id: true,
@@ -102,8 +108,12 @@ export class ProjectUserRepository {
       by: ['projectId'],
       where: {
         project: {
-          academicYear: req.academicYear,
+          ...(req.academicYear && { academicYear: req.academicYear }),
+          ...(req.projectAcademicYear && {
+            projectAcademicYear: req.projectAcademicYear,
+          }),
           ...(req.semester && { semester: req.semester }),
+          ...(req.projectSemester && { projectSemester: req.projectSemester }),
           ...(req.projectName && {
             projectName: {
               contains: req.projectName,
@@ -196,8 +206,15 @@ export class ProjectUserRepository {
       },
     })
 
-    const { academicYear, semester, projectName, projectStatus, courseStatus } =
-      filter
+    const {
+      academicYear,
+      semester,
+      projectName,
+      projectStatus,
+      courseStatus,
+      projectAcademicYear,
+      projectSemester,
+    } = filter
 
     const projects = await prisma.project.findMany({
       where: {
@@ -236,6 +253,10 @@ export class ProjectUserRepository {
                   },
                 },
               ]
+            : []),
+          ...(projectSemester ? [{ projectSemester: projectSemester }] : []),
+          ...(projectAcademicYear
+            ? [{ projectAcademicYear: projectAcademicYear }]
             : []),
         ],
       },
@@ -299,7 +320,6 @@ export class ProjectUserRepository {
       },
       include: {
         user: {
-          
           select: {
             id: true,
             name: true,

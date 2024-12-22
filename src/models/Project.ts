@@ -47,7 +47,9 @@ export type UpdateProjectRequest = {
   detail?: string
   detailEng?: string
   semester?: number
+  projectSemester?: number
   academicYear?: number
+  projectAcademicYear?: number
   type?: string | null
   projectStatusId?: number | null
   courseStatus?: number
@@ -62,6 +64,8 @@ export type UpdateProjectsRequest = {
   projectStatusId?: number | null
   semester?: number
   academicYear?: number
+  projectSemester?: number
+  projectAcademicYear?: number
   type?: string | null
 }
 
@@ -76,6 +80,8 @@ export type ListProjectsFilter = {
   projectName?: string
   projectStatus?: number[]
   courseStatus?: number[]
+  projectSemester?: number
+  projectAcademicYear?: number
 }
 
 export type ProjectStudent = {
