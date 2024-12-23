@@ -24,9 +24,56 @@ const projectSwaggerDetail = (summary: string, detail: string) => {
 export const ProjectDelivery = new Elysia({ prefix: '/project' })
   .use(middleWare.JwtConfig)
   .use(bearer())
-  .guard({
-    beforeHandle: middleWare.checkAuthorization,
-  })
+  // .guard({
+  //   beforeHandle: middleWare.checkAuthorization,
+  // })
+  .get(
+    '/pass-pre',
+    async ({ query, set }) => {
+      try {
+        const filter: ListProjectsFilter = {
+          academicYear: query.academicYear,
+          semester: query.semester,
+          projectName: query.projectName || undefined,
+        }
+        const projects = await projectUsecase.ListProjectPassPre(filter)
+        return utils.SuccessMessage(
+          title,
+          'ProjectController.ListProjectPassPre successfully',
+          projects
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.ListProjectPassPre Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed List Projects Pass Pre')
+      }
+    },
+    {
+      query: t.Object({
+        academicYear: t.Optional(t.Number()),
+        semester: t.Optional(t.Number()),
+        projectName: t.Optional(t.String()),
+      }),
+      detail: {
+        ...projectSwaggerDetail(
+          'List project pass pre',
+          'Get a list of projects pass pre with optional filters'
+        ),
+        parameters: [
+          {
+            name: 'courseStatus, projectStatus',
+            in: 'query',
+            required: false,
+            description:
+              'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
+          },
+        ],
+      },
+    }
+  )
   .post(
     '/',
     async ({ jwt, bearer, body, set }) => {
@@ -108,6 +155,8 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
           courseStatus: query.courseStatus
             ? query.courseStatus.split(',').map(Number)
             : undefined,
+          projectAcademicYear: query.projectAcademicYear,
+          projectSemester: query.projectSemester,
         }
         const projects = await projectUsecase.ListProjects(filter)
         return utils.SuccessMessage(

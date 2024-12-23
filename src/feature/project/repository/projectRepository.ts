@@ -7,9 +7,9 @@ import {
   UpdateProjectsRequest,
 } from '@/models/Project'
 import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
+import courseStatus from '@/statics/constants/course/courseStatus'
 
 const prisma = new PrismaClient()
-
 export class ProjectRepository {
   static CreateProject = async (projectData: CreateProjectRequest) => {
     return await prisma.$transaction(async (prisma) => {
@@ -276,6 +276,8 @@ export class ProjectRepository {
       abstract: true,
       semester: true,
       academicYear: true,
+      projectSemester: true,
+      projectAcademicYear:true,
       type: true,
       createdAt: true,
       updatedAt: true,
@@ -296,6 +298,35 @@ export class ProjectRepository {
         updatedAt: 'desc',
       },
       select: selectFields,
+    })
+  }
+
+  static ListProjectPassPre(req: ListProjectsFilter) {
+    const { projectName } = req
+    return prisma.project.findMany({
+      where: {
+        academicYear: {
+          gte: req.academicYear,
+        },
+        courseStatus: courseStatus.PassPre,
+        ...(req.semester && { semester: req.semester }),
+        ...(req.projectName && {
+          OR: [
+            {
+              projectName: {
+                contains: projectName,
+                mode: 'insensitive' as const,
+              },
+            },
+            {
+              username: {
+                contains: projectName,
+                mode: 'insensitive' as const,
+              },
+            },
+          ],
+        }),
+      },
     })
   }
 }

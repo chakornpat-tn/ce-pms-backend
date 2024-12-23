@@ -148,11 +148,13 @@ model Comment {
 
 model ProgressReport {
   id              Int      @id @default(autoincrement()) @map("id")
+  title           String   @map("title")
+  status          Int      @default(1) @map("status")
   report          Json?    @map("report")
   reportResult    Json?    @map("report_result")
-  productProgress Int      @map("product_progress")
+  productProgress Int?      @map("product_progress")
   productUrl      String?  @map("product_url")
-  docsProgress    Int      @map("docs_progress")
+  docsProgress    Int?      @map("docs_progress")
   docsUrl         String?  @map("docs_url")
   createAt        DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
