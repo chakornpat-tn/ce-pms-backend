@@ -366,6 +366,8 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         const req: ListProjectsFilter = {
           academicYear: query.academicYear,
           semester: query.semester,
+          projectAcademicYear: query.projectAcademicYear,
+          projectSemester: query.projectSemester,
           projectStatus: query.projectStatus
             ? query.projectStatus.split(',').map(Number)
             : undefined,
@@ -396,6 +398,8 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
       query: t.Object({
         academicYear: t.Optional(t.Number()),
         semester: t.Optional(t.Number()),
+        projectAcademicYear: t.Optional(t.Number()),
+        projectSemester: t.Optional(t.Number()),
         projectName: t.Optional(t.String()),
         projectStatus: t.Optional(
           t.String({
@@ -409,8 +413,6 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
               'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
           })
         ),
-        projectAcademicYear: t.Optional(t.Number()),
-        projectSemester: t.Optional(t.Number()),
       }),
       detail: ProjectUserSwaggerDetail(
         'List Project User',

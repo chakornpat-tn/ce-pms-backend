@@ -24,7 +24,7 @@ const GCS = {
       const bucket = storage.bucket(bucketName)
       if (!bucket) throw new Error('Bucket not found')
 
-      if (!['document', 'exam-docs'].includes(folder)) {
+      if (!['document', 'exam-docs', 'progress-report'].includes(folder)) {
         throw new Error('Invalid folder')
       }
 

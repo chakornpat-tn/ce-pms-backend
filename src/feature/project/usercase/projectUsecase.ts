@@ -8,7 +8,7 @@ import {
   CreateProjectRequest,
 } from '@/models/Project'
 
-const projectRepo  = ProjectRepository
+const projectRepo = ProjectRepository
 
 export class ProjectUsecase {
   static ListProjects = async (filter: ListProjectsFilter) => {
@@ -58,5 +58,9 @@ export class ProjectUsecase {
 
     const project = await projectRepo.CreateProject(projectData)
     return project
+  }
+
+  static ListProjectPassPre = async (req: ListProjectsFilter) => {
+    return projectRepo.ListProjectPassPre(req)
   }
 }
