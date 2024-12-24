@@ -33,7 +33,7 @@ export class ProjectUserUsecase {
     const incompleteProject =
       await projectUserRepo.GetProjectsWithIncompleteUsers(req)
     const projectIDs = incompleteProject.map((item) => item.projectId)
-    const projects = await projectUserRepo.GetProjectByIDs(projectIDs,userId)
+    const projects = await projectUserRepo.GetProjectByIDs(projectIDs, userId)
     return projects
   }
 
@@ -49,5 +49,9 @@ export class ProjectUserUsecase {
   }
   static GetProjectUserDetail = async (projectId?: number, userId?: number) => {
     return await projectUserRepo.GetProjectUserDetail(projectId, userId)
+  }
+
+  static CheckUserIsAdvisor = async (userId: number, projectId: number) => {
+    return await projectUserRepo.CheckUserIsAdvisor(userId, projectId)
   }
 }
