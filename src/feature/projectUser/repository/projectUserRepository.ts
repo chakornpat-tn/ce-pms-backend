@@ -1,8 +1,8 @@
 import { ProjectUser, PrismaClient } from '@prisma/client'
 import { ListProjectsFilter } from '@/models/Project'
 import { UpdateProjectUserRequest } from '@/models/ProjectUser'
-import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
 import courseStatus from '@/statics/constants/course/courseStatus'
+import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
 
 const prisma = new PrismaClient()
 
@@ -329,5 +329,20 @@ export class ProjectUserRepository {
     })
 
     return projectUser
+  }
+
+  static CheckUserIsAdvisor = async (userID: number, projectID: number) => {
+    const isAdvisor =
+      (await prisma.projectUser.count({
+        where: {
+          userId: userID,
+          projectId: projectID,
+          userProjectRole: {
+            in: [userProjectRole.ADVISOR, userProjectRole.CO_ADVISOR],
+          },
+        },
+      })) > 0
+
+    return isAdvisor
   }
 }

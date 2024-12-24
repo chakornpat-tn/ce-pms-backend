@@ -7,7 +7,9 @@ import * as fs from 'fs/promises'
 import {
   CreateProgressReportRequest,
   CreateProgressReportRequestBody,
+  UpdateProgressReport,
 } from '@/models/ProgressReport'
+import { ProgressReport } from '@prisma/client'
 
 const title = 'Progress Report Controller V1'
 const PReportUsecase = ProgressReportUsecase
@@ -58,8 +60,8 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
     async ({ params, set }) => {
       try {
         const id = params.id
-        
-        const progress =  await PReportUsecase.DeleteProgressReport(id)
+
+        const progress = await PReportUsecase.DeleteProgressReport(id)
         if (progress.docsUrl || progress.productUrl) {
           const gcs = utils.GCS
           try {
@@ -121,7 +123,7 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
   )
   .post(
     '/',
-    async ({ params, body, set }) => {
+    async ({ body, set }) => {
       let tempFilePath1: string | null = null
       let tempFilePath2: string | null = null
       let url1: string | null = null
@@ -138,7 +140,7 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
           .slice(0, 12)
 
         if (req.productFile) {
-          const destination1 = `${timestamp1}-prod${data.projectId}-${data.title}.pdf`
+          const destination1 = `${timestamp1}-prod${data.projectId}.pdf`
           tempFilePath1 = `tmp/${destination1}`
           await Bun.write(tempFilePath1, req.productFile)
           url1 = await gcs.UploadFile(
@@ -149,7 +151,7 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
         }
 
         if (req.docsFile) {
-          const destination2 = `${timestamp1}-docs${data.projectId}-${data.title}.pdf`
+          const destination2 = `${timestamp1}-docs${data.projectId}.pdf`
           tempFilePath2 = `tmp/${destination2}`
           await Bun.write(tempFilePath2, req.docsFile)
           url2 = await gcs.UploadFile(
@@ -192,6 +194,99 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
       detail: ProgressReportSwaggerDetail(
         'Create Progress Report',
         'Create a progress report'
+      ),
+    }
+  )
+  .put(
+    '/:id',
+    async ({ params, body, set }) => {
+      let tempFilePath1: string | null = null
+      let tempFilePath2: string | null = null
+      let url1: string | null = null
+      let url2: string | null = null
+      const gcs = utils.GCS
+      try {
+        const id = params.id
+        const req = body as CreateProgressReportRequestBody
+        const data = JSON.parse(req.data) as UpdateProgressReport
+
+        const timestamp1 = new Date()
+          .toISOString()
+          .replace(/[-:T]/g, '')
+          .slice(0, 12)
+
+        const PReport = (await PReportUsecase.GetProgressReport(
+          id
+        )) as ProgressReport
+
+        if (req.productFile) {
+          try {
+            if (PReport.productUrl) await gcs.DeleteFile(PReport.productUrl)
+          } catch (error) {
+            console.log('error', error)
+          }
+          const destination1 = `${timestamp1}-prod${data.projectId}.pdf`
+          tempFilePath1 = `tmp/${destination1}`
+          await Bun.write(tempFilePath1, req.productFile)
+          url1 = await gcs.UploadFile(
+            tempFilePath1,
+            destination1,
+            'progress-report'
+          )
+        }
+
+        if (req.docsFile) {
+          try {
+            if (PReport.docsUrl) await gcs.DeleteFile(PReport.docsUrl)
+          } catch (error) {
+            console.log('error', error)
+          }
+          const destination2 = `${timestamp1}-docs${data.projectId}.pdf`
+          tempFilePath2 = `tmp/${destination2}`
+          await Bun.write(tempFilePath2, req.docsFile)
+          url2 = await gcs.UploadFile(
+            tempFilePath2,
+            destination2,
+            'progress-report'
+          )
+        }
+
+        if (url1) data.productUrl = url1
+        if (url2) data.docsUrl = url2
+
+        await PReportUsecase.UpdateProgressReport(id, data)
+
+        if (tempFilePath1) await fs.rm(tempFilePath1)
+        if (tempFilePath2) await fs.rm(tempFilePath2)
+
+        return utils.SuccessMessage(
+          title,
+          'Update progress report successfully'
+        )
+      } catch (error) {
+        if (tempFilePath1) await fs.rm(tempFilePath1)
+        if (tempFilePath2) await fs.rm(tempFilePath2)
+
+        if (url1) await gcs.DeleteFile(url1)
+        if (url2) await gcs.DeleteFile(url2)
+
+        utils.logger.warn(error, 'Update ProgressReport.Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Update Progress Report failed')
+      }
+    },
+    {
+      params: t.Object({
+        id: t.Number(),
+      }),
+      body: t.Object({
+        productFile: t.Optional(t.File()),
+        docsFile: t.Optional(t.File()),
+        data: t.String(),
+      }),
+      detail: ProgressReportSwaggerDetail(
+        'Update Progress Report',
+        'Update a progress report'
       ),
     }
   )

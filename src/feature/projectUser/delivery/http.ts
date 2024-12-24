@@ -28,6 +28,39 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/check-advisor/:userId/:projectId',
+    async ({ params, set }) => {
+      try {
+        const projectId = params.projectId
+        const userId = params.userId
+        const isAdvisor = await projectUserUsecase.CheckUserIsAdvisor(
+          userId,
+          projectId
+        )
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          'Check Advisor Project Success.',
+          isAdvisor
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Check Advisor Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Check Advisor Error.')
+      }
+    },
+    {
+      params: t.Object({
+        userId: t.Number(),
+        projectId: t.Number(),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Check Advisor',
+        'Check Advisor Project'
+      ),
+    }
+  )
+  .get(
     '/check-regis-exam-date/:projectId',
     async ({ params, set }) => {
       try {

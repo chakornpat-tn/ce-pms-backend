@@ -4,8 +4,8 @@ export type ProgressReport = {
   id: number
   title: string
   status: number
-  report?: any
-  reportResult?: any
+  report?: ReportType
+  reportResult?: ReportResultType
   productProgress: number
   productUrl?: string
   docsProgress: number
@@ -27,12 +27,13 @@ export type CreateProgressReportRequest = {
 export type UpdateProgressReport = {
   title?: string
   status?: number
-  report?: any
-  reportResult?: any
+  report?: ReportType
+  reportResult?: ReportResultType
   productProgress?: number
   productUrl?: string
   docsProgress: number
   docsUrl?: string
+  projectId?: number
 }
 
 type ReportType = {
@@ -46,8 +47,18 @@ type ReportType = {
   productProgress: number
 }
 
+export type ReportResultType = {
+  questionSections: {
+    question1?: number
+    question2?: number
+    question3?: number
+    question4?: number
+  }
+  comment?: string
+}
+
 export type CreateProgressReportRequestBody = {
   productFile?: File
-  docsFile?:File
+  docsFile?: File
   data: string
 }
