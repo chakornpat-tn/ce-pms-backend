@@ -56,6 +56,7 @@ export type UpdateProjectRequest = {
   students?: ProjectStudentRequest[]
   users?: ProjectUser[]
   examDateTime: Date
+  examLocation?: string
 }
 
 export type UpdateProjectsRequest = {

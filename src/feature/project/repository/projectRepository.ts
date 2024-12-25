@@ -102,6 +102,9 @@ export class ProjectRepository {
           ...(projectData.examDateTime !== undefined && {
             examDateTime: projectData.examDateTime,
           }),
+          ...(projectData.examDateTime !== undefined && {
+            examDateTime: projectData.examDateTime,
+          }),
           ...(projectData.students && {
             students: {
               deleteMany: {},
@@ -277,7 +280,7 @@ export class ProjectRepository {
       semester: true,
       academicYear: true,
       projectSemester: true,
-      projectAcademicYear:true,
+      projectAcademicYear: true,
       type: true,
       createdAt: true,
       updatedAt: true,

@@ -272,6 +272,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         projectStatusId: t.Optional(t.Union([t.Number(), t.Null()])),
         courseStatus: t.Optional(t.Number()),
         examDateTime: t.Optional(t.Date()),
+        examLocation: t.Optional(t.String()),
         students: t.Optional(
           t.Array(
             t.Object({
