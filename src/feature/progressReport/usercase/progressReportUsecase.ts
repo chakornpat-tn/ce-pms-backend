@@ -28,4 +28,8 @@ export class ProgressReportUsecase {
   ) => {
     return await PReportRepo.UpdateProgressReport(id, req)
   }
+
+  static GetProjectProgressReport = async (projectId: number) => {
+    return await PReportRepo.GetProjectProgressReport(projectId)
+  }
 }

@@ -58,4 +58,24 @@ export class ProgressReportRepository {
       data: req,
     })
   }
+
+  static GetProjectProgressReport = async (projectId : number) => {
+    return await prisma.progressReport.findFirst({
+          where: {
+            projectId,
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+          select: {
+            id: true,
+            projectId: true,
+            productProgress: true,
+            docsProgress: true,
+            updatedAt: true,
+          },
+        })
+    
+  }
+
 }

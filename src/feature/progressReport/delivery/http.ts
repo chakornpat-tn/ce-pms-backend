@@ -29,6 +29,38 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/project/:projectId',
+    async ({ params, set }) => {
+      try {
+        const projectId = params.projectId
+        const progressReports = await PReportUsecase.GetProjectProgressReport(
+          projectId
+        )
+        return utils.SuccessMessage(
+          title,
+          'Get project progress report successfully',
+          progressReports
+        )
+      } catch (error) {
+        utils.logger.warn(error as Error, 'ProgressReport.Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'Failed to list project progress reports'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        projectId: t.Number(),
+      }),
+      detail: ProgressReportSwaggerDetail(
+        'Get Project Progress Report',
+        'Get project progress report by project id'
+      ),
+    }
+  )
+  .get(
     '/:id',
     async ({ params, set }) => {
       try {

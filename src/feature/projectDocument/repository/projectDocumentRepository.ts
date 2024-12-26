@@ -1,4 +1,6 @@
 import { CreateProjectDocument } from '@/models/ProjectDocument'
+import course from '@/statics/constants/course/course'
+import projectDocumentStatus from '@/statics/constants/projectDocumentStatus/projectDocumentStatus'
 import { PrismaClient, ProjectDocument } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -112,5 +114,42 @@ export class ProjectDocumentRepository {
         id,
       },
     })
+  }
+  static ListLastDocsApproveInProject = async (projectId: number) => {
+
+    const Docs = await prisma.projectDocument.findMany({
+      where: {
+        projectId,
+        status: projectDocumentStatus.APPROVED,
+      },
+      include: {
+        document: {
+          select: {
+            course: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      distinct: ['documentId'],
+    })
+
+    const preProjectDocs = []
+    const projectDocs = []
+
+    for (const doc of Docs) {
+      if (doc.document.course === course.PreProject) {
+        preProjectDocs.push(doc)
+      } else if (doc.document.course === course.Project) {
+        projectDocs.push(doc)
+      }
+    }
+
+    return {
+      preProject: preProjectDocs,
+      project: projectDocs,
+    }
   }
 }

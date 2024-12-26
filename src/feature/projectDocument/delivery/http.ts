@@ -2,7 +2,10 @@ import Elysia, { t } from 'elysia'
 import bearer from '@elysiajs/bearer'
 import { ProjectDocument } from '@prisma/client'
 import { ProjectDocumentUsecase } from '../usercase/projectDocumentUsecase'
-import { CreateProjectDocument, ProjectDocumentRequest } from '@/models/ProjectDocument'
+import {
+  CreateProjectDocument,
+  ProjectDocumentRequest,
+} from '@/models/ProjectDocument'
 import * as fs from 'fs/promises'
 import * as middleWare from '@/middleware'
 import * as utils from '@/utils'
@@ -26,6 +29,45 @@ export const ProjectDocumentDelivery = new Elysia({
   .guard({
     beforeHandle: middleWare.checkAuthorization,
   })
+  .get(
+    '/advisor-approve/:projectId',
+    async ({ params, set }) => {
+      try {
+        const document =
+          await projectDocumentUsecase.ListLastDocsApproveInProject(
+            params.projectId
+          )
+        if (!document) {
+          set.status = 404
+          return utils.ErrorMessage(
+            title,
+            'List project document advisor approve error.'
+          )
+        }
+        return utils.SuccessMessage(
+          title,
+          'list project document advisor approve success.',
+          document
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Project Document Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'List project document advisor approve error.'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        projectId: t.Number(),
+      }),
+      detail: ProjectDocumentSwaggerDetail(
+        'List Project Document Approve',
+        'List project document approve by project id'
+      ),
+    }
+  )
   .post(
     '/',
     async ({ body, set }) => {
@@ -35,7 +77,7 @@ export const ProjectDocumentDelivery = new Elysia({
       try {
         const req = body as ProjectDocumentRequest
         const data = JSON.parse(req.data) as CreateProjectDocument
-        if(req.commentIDs) {
+        if (req.commentIDs) {
           const commentIDs = req.commentIDs.split(',').map(Number)
           data.commentIDs = commentIDs
         }
@@ -85,13 +127,16 @@ export const ProjectDocumentDelivery = new Elysia({
           description:
             'JSON string containing project document {projectId: number, documentIdn: number, documentName: string } ',
         }),
-        commentIDs: t.Optional(t.String({
+        commentIDs: t.Optional(
+          t.String({
             description: 'Comment IDs have edit in docs',
-          }))
+          })
+        ),
       }),
       detail: ProjectDocumentSwaggerDetail(
         'Create Project Document',
-        'Upload a new PDF document (max 25MB) and create a project document record with associated metadata'      ),
+        'Upload a new PDF document (max 25MB) and create a project document record with associated metadata'
+      ),
     }
   )
   .get(
@@ -282,4 +327,3 @@ export const ProjectDocumentDelivery = new Elysia({
       ),
     }
   )
- 

@@ -27,4 +27,8 @@ export class ProjectDocumentUsecase {
   static DeleteProjectDocument = async (id: number) => {
     return await projectDocumentRepo.DeleteProjectDocument(id)
   }
+
+  static ListLastDocsApproveInProject = async (projectId: number) => {
+    return await projectDocumentRepo.ListLastDocsApproveInProject(projectId)
+  }
 }
