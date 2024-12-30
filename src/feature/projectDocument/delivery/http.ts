@@ -30,6 +30,53 @@ export const ProjectDocumentDelivery = new Elysia({
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/project-docs-status/:projectId/:course',
+    async ({ params, set }) => {
+      try {
+
+        const projectId = params.projectId
+        const course = params.course
+        const document =
+          await projectDocumentUsecase.ListLastStatusDocsInProject(
+            projectId,
+            course
+          )
+        if (!document) {
+          set.status = 404
+          return utils.ErrorMessage(
+            title,
+            'List Last document status in project error.'
+          )
+        }
+        return utils.SuccessMessage(
+          title,
+          'List last document status in project.',
+          document
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error,
+          'List Last Status Document In Project Controller Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'List last document status in project error.'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        projectId: t.Number(),
+        course: t.Optional(t.Number()),
+      }),
+      detail: ProjectDocumentSwaggerDetail(
+        'List Last Document Status In Project',
+        'List last document status by project id and course'
+      ),
+    }
+  )
+  .get(
     '/advisor-approve/:projectId',
     async ({ params, set }) => {
       try {

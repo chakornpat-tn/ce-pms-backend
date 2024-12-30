@@ -116,7 +116,6 @@ export class ProjectDocumentRepository {
     })
   }
   static ListLastDocsApproveInProject = async (projectId: number) => {
-
     const Docs = await prisma.projectDocument.findMany({
       where: {
         projectId,
@@ -151,5 +150,29 @@ export class ProjectDocumentRepository {
       preProject: preProjectDocs,
       project: projectDocs,
     }
+  }
+
+  static ListLastDocsStatusInProject = async (
+    projectId: number,
+    projectCourse: number
+  ) => {
+    const result = await prisma.projectDocument.findMany({
+      where: {
+        projectId: projectId,
+        document: {
+          course: projectCourse,
+        },
+      },
+      distinct: ['documentId'],
+      orderBy: [{ documentId: 'asc' }, { createdAt: 'desc' }],
+      select: {
+        id: true,
+        projectId: true,
+        documentId: true,
+        documentName: true,
+        status: true,
+      },
+    })
+    return result
   }
 }

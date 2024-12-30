@@ -1,6 +1,7 @@
 import { CreateProjectDocument } from '@/models/ProjectDocument'
 import { ProjectDocumentRepository } from '../repository/projectDocumentRepository'
 import { ProjectDocument } from '@prisma/client'
+import course from '@/statics/constants/course/course'
 
 const projectDocumentRepo = ProjectDocumentRepository
 
@@ -30,5 +31,9 @@ export class ProjectDocumentUsecase {
 
   static ListLastDocsApproveInProject = async (projectId: number) => {
     return await projectDocumentRepo.ListLastDocsApproveInProject(projectId)
+  }
+
+  static ListLastStatusDocsInProject = async (projectId:number, projectCourse: number = course.PreProject) => {
+    return await projectDocumentRepo.ListLastDocsStatusInProject(projectId, projectCourse)
   }
 }
