@@ -1,6 +1,7 @@
 import { CreateProjectDocument } from '@/models/ProjectDocument'
 import course from '@/statics/constants/course/course'
 import projectDocumentStatus from '@/statics/constants/projectDocumentStatus/projectDocumentStatus'
+import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
 import { PrismaClient, ProjectDocument } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -171,6 +172,44 @@ export class ProjectDocumentRepository {
         documentId: true,
         documentName: true,
         status: true,
+      },
+    })
+    return result
+  }
+
+  static ListProjectDocsWaitUpdate = async (userID: number) => {
+    const result = await prisma.projectDocument.findMany({
+      where: {
+        status: projectDocumentStatus.WAITING,
+        project: {
+          users: {
+            some: {
+              userId: userID,
+              userProjectRole: {
+                in: [userProjectRole.ADVISOR, userProjectRole.CO_ADVISOR],
+              },
+            },
+          },
+        },
+      },
+      select: {
+        project: {
+          select: {
+            id: true,
+            projectName: true,
+            academicYear: true,
+            projectAcademicYear: true,
+          },
+        },
+        document: {
+          select: {
+            name: true,
+          },
+        },
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
       },
     })
     return result

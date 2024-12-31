@@ -36,4 +36,8 @@ export class ProjectDocumentUsecase {
   static ListLastStatusDocsInProject = async (projectId:number, projectCourse: number = course.PreProject) => {
     return await projectDocumentRepo.ListLastDocsStatusInProject(projectId, projectCourse)
   }
+
+  static ListProjectDocsWaitUpdate = async (userID:number) => {
+    return await projectDocumentRepo.ListProjectDocsWaitUpdate(userID)
+  }
 }

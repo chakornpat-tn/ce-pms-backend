@@ -253,7 +253,7 @@ export class ProjectRepository {
     } = filter
 
     const whereConditions = {
-      ...(academicYear && { academicYear }),
+      
       ...(semester && { semester }),
       ...(projectName && {
         projectName: {
@@ -272,7 +272,14 @@ export class ProjectRepository {
         },
       }),
       ...(projectSemester && { projectSemester: projectSemester }),
-      ...(projectAcademicYear && { projectAcademicYear: projectAcademicYear }),
+      ...(academicYear && projectAcademicYear && {
+        OR: [
+          { academicYear: academicYear },
+          { projectAcademicYear: projectAcademicYear },
+        ],
+      }),
+      ...(academicYear && !projectAcademicYear && { academicYear }),
+      ...(projectAcademicYear && !academicYear && { projectAcademicYear }),
     }
 
     const selectFields = {

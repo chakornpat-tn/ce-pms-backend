@@ -54,4 +54,9 @@ export class ProjectUserUsecase {
   static CheckUserIsAdvisor = async (userId: number, projectId: number) => {
     return await projectUserRepo.CheckUserIsAdvisor(userId, projectId)
   }
+
+  static GetExamDateTimeByUserID = async (userId: number) => {
+    return await projectUserRepo.GetExamDateTimeByUserID(userId)
+  }
+
 }

@@ -345,4 +345,39 @@ export class ProjectUserRepository {
 
     return isAdvisor
   }
+
+  static GetExamDateTimeByUserID = async (userID: number) => {
+    const examDateTime = await prisma.project.findMany({
+      where: {
+        id: {
+          in: await prisma.projectUser
+            .findMany({
+              where: {
+                userId: userID,
+              },
+              select: {
+                projectId: true,
+              },
+            })
+            .then((users) => users.map((user) => user.projectId)),
+        },
+        examDateTime: {
+          gte: new Date(),
+        },
+      },
+      select: {
+        id: true,
+        projectName: true,
+        projectNameEng: true,
+        examDateTime: true,
+        examLocation: true,
+        academicYear: true,
+        projectAcademicYear: true,
+      },
+      orderBy: {
+        examDateTime: 'asc',
+      },
+    })
+    return examDateTime
+  }
 }

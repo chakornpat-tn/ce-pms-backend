@@ -30,10 +30,43 @@ export const ProjectDocumentDelivery = new Elysia({
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/wait-update/:userId',
+    async ({ params, set }) => {
+      try {
+       const userID = params.userId
+        const document = await projectDocumentUsecase.ListProjectDocsWaitUpdate(userID)
+        
+        return utils.SuccessMessage(
+          title,
+          'List Project Document Waiting Update Success.',
+          document
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error,
+          'List Project Document Waiting Update Error.'
+        )
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'List Project Document Waiting Update Success.'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        userId:t.Number()
+      }),
+      detail: ProjectDocumentSwaggerDetail(
+        'List Project Document Waiting Update Success.',
+        'List project document waiting update error.'
+      ),
+    }
+  )
+  .get(
     '/project-docs-status/:projectId/:course',
     async ({ params, set }) => {
       try {
-
         const projectId = params.projectId
         const course = params.course
         const document =

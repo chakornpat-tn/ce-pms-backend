@@ -28,6 +28,35 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/check-exam-date/:userId',
+    async ({ params, set }) => {
+      try {
+        const userId = params.userId
+        const isExamDate = await projectUserUsecase.GetExamDateTimeByUserID(userId)
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          'Check Exam Date Success.',
+          isExamDate
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Check Exam Date Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Check Exam Date Error.')
+      }
+    },
+    {
+      params: t.Object({
+        userId: t.Number(),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Check Exam Date In userID',
+        'Check Exam Date In userID',
+      )
+    },
+    
+  )
+  .get(
     '/check-advisor/:userId/:projectId',
     async ({ params, set }) => {
       try {
