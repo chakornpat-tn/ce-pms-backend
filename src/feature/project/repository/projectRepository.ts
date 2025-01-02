@@ -205,7 +205,7 @@ export class ProjectRepository {
         createdAt: true,
         updatedAt: true,
         examDateTime: true,
-        examLocation:true,
+        examLocation: true,
         students: {
           select: {
             student: {
@@ -253,8 +253,6 @@ export class ProjectRepository {
     } = filter
 
     const whereConditions = {
-      
-      ...(semester && { semester }),
       ...(projectName && {
         projectName: {
           contains: projectName,
@@ -271,13 +269,20 @@ export class ProjectRepository {
           in: courseStatus,
         },
       }),
-      ...(projectSemester && { projectSemester: projectSemester }),
-      ...(academicYear && projectAcademicYear && {
-        OR: [
-          { academicYear: academicYear },
-          { projectAcademicYear: projectAcademicYear },
-        ],
-      }),
+      ...(semester &&
+        projectSemester && {
+          OR: [{ semester: semester }, { projectSemester: projectSemester }],
+        }),
+      ...(semester && !projectSemester && { semester }),
+      ...(projectSemester && !semester && { projectSemester }),
+
+      ...(academicYear &&
+        projectAcademicYear && {
+          OR: [
+            { academicYear: academicYear },
+            { projectAcademicYear: projectAcademicYear },
+          ],
+        }),
       ...(academicYear && !projectAcademicYear && { academicYear }),
       ...(projectAcademicYear && !academicYear && { projectAcademicYear }),
     }
