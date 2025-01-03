@@ -2,6 +2,9 @@ import {
   CreateProgressReportRequest,
   UpdateProgressReport,
 } from '@/models/ProgressReport'
+import progressReportStatus from '@/statics/constants/progressReport/status'
+import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
+import userRoles from '@/statics/constants/userRoles/userRoles'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
@@ -76,6 +79,35 @@ export class ProgressReportRepository {
           },
         })
     
+  }
+
+  static GetProjectProgressReportUpdate = async (userID:number) => {
+    return await prisma.progressReport.findMany({
+      where: {
+        status: progressReportStatus.WAITING,
+        project: {
+          users: {
+            some: {
+              userId: userID,
+              userProjectRole: {
+                in: [userProjectRole.ADVISOR, userProjectRole.CO_ADVISOR],
+              },
+            }
+          }
+        }
+      },
+      select: {
+        project: {
+          select: {
+            id: true,
+            projectName: true
+          }
+        },
+        id: true,
+        title: true,
+        createAt: true
+      }
+    })
   }
 
 }

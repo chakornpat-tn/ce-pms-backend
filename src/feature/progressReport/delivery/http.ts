@@ -29,6 +29,38 @@ export const ProgressReportDelivery = new Elysia({ prefix: '/progress-report' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/wait-update/:userId',
+    async ({ params, set }) => {
+      try {
+        const userId = params.userId
+        const projectProgressUpdate = await PReportUsecase.GetProjectProgressReportUpdate(
+          userId
+        )
+        return utils.SuccessMessage(
+          title,
+          'Get project progress report wait for update successfully',
+          projectProgressUpdate
+        )
+      } catch (error) {
+        utils.logger.warn(error as Error, 'ProgressReportWaitUpdate.Controller Error')
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'Failed to list project progress reports wait for update'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        userId: t.Number(),
+      }),
+       detail: ProgressReportSwaggerDetail(
+        'Get Project Progress Report Wait Update',
+        'Get project progress report wait for update by user id'
+      ),
+    }
+  )
+  .get(
     '/project/:projectId',
     async ({ params, set }) => {
       try {

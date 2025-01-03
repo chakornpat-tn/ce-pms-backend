@@ -1,7 +1,9 @@
 import { ProgressReportRepository } from '../repository/progressReportRepository'
 import config from '@/config'
-import { CreateProgressReportRequest, UpdateProgressReport } from '@/models/ProgressReport'
-import userRoles from '@/statics/constants/userRoles/userRoles'
+import {
+  CreateProgressReportRequest,
+  UpdateProgressReport,
+} from '@/models/ProgressReport'
 
 const PReportRepo = ProgressReportRepository
 
@@ -31,5 +33,9 @@ export class ProgressReportUsecase {
 
   static GetProjectProgressReport = async (projectId: number) => {
     return await PReportRepo.GetProjectProgressReport(projectId)
+  }
+
+  static GetProjectProgressReportUpdate = async (userID: number) => {
+    return await PReportRepo.GetProjectProgressReportUpdate(userID)
   }
 }
