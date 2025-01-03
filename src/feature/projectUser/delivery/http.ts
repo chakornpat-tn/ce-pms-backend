@@ -28,11 +28,46 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
+    '/count-project/:userId/:academicYear',
+    async ({ params, set }) => {
+      try {
+        const userId = params.userId
+        const academicYear = params.academicYear
+        const projectCount = await projectUserUsecase.CountProjectInYear(
+          userId,
+          academicYear
+        )
+        set.status = 200
+        return utils.SuccessMessage(
+          title,
+          `Count project In ${academicYear} success.`,
+          projectCount
+        )
+      } catch (error) {
+        utils.logger.warn(error, 'Project User Count Project In Year Error')
+        set.status = 500
+        return utils.ErrorMessage(title, 'Project User Count Project In Year Error.')
+      }
+    },
+    {
+      params: t.Object({
+        userId: t.Number(),
+        academicYear: t.Number(),
+      }),
+      detail: ProjectUserSwaggerDetail(
+        'Count Project In Year',
+        'Count project in year by userId and academicYear'
+      ),
+    }
+  )
+  .get(
     '/check-exam-date/:userId',
     async ({ params, set }) => {
       try {
         const userId = params.userId
-        const isExamDate = await projectUserUsecase.GetExamDateTimeByUserID(userId)
+        const isExamDate = await projectUserUsecase.GetExamDateTimeByUserID(
+          userId
+        )
         set.status = 200
         return utils.SuccessMessage(
           title,
@@ -51,10 +86,9 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
       }),
       detail: ProjectUserSwaggerDetail(
         'Check Exam Date In userID',
-        'Check Exam Date In userID',
-      )
-    },
-    
+        'Check Exam Date In userID'
+      ),
+    }
   )
   .get(
     '/check-advisor/:userId/:projectId',

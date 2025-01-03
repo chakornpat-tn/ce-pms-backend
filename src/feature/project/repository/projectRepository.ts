@@ -319,9 +319,9 @@ export class ProjectRepository {
     })
   }
 
-  static ListProjectPassPre(req: ListProjectsFilter) {
+  static async ListProjectPassPre(req: ListProjectsFilter) {
     const { projectName } = req
-    return prisma.project.findMany({
+    return await prisma.project.findMany({
       where: {
         academicYear: {
           gte: req.academicYear,

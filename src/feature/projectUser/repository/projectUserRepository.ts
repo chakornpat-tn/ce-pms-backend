@@ -380,4 +380,45 @@ export class ProjectUserRepository {
     })
     return examDateTime
   }
+
+  static CountProjectInYear = async (userID: number, academicYear: number) => {
+    const projectCount = await prisma.project
+      .findMany({
+        where: {
+          OR: [
+            { academicYear: academicYear },
+            { projectAcademicYear: academicYear },
+          ],
+          users: {
+            some: {
+              userProjectRole: {
+                in: [userProjectRole.ADVISOR, userProjectRole.CO_ADVISOR],
+              },
+            },
+          },
+        },
+      })
+      .then((projects) => ({
+        CountPreProp: projects.filter(
+          (p) =>
+            p.academicYear === academicYear &&
+            p.projectAcademicYear === null &&
+            p.courseStatus >= courseStatus.PreProject &&
+            p.courseStatus <= courseStatus.PassPre
+        ).length,
+        CountOnProject: projects.filter(
+          (p) =>
+            p.projectAcademicYear === academicYear &&
+            p.courseStatus >= courseStatus.Project &&
+            p.courseStatus <= courseStatus.Pass
+        ).length,
+        CountAllProject: projects.filter(
+          (p) =>
+            (p.projectAcademicYear === academicYear ||
+              p.academicYear === academicYear) &&
+            p.courseStatus !== courseStatus.Fail
+        ).length,
+      }))
+    return projectCount
+  }
 }

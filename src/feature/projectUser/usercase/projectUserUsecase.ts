@@ -59,4 +59,7 @@ export class ProjectUserUsecase {
     return await projectUserRepo.GetExamDateTimeByUserID(userId)
   }
 
+  static CountProjectInYear = async (userID: number, academicYear: number) => {
+    return await projectUserRepo.CountProjectInYear(userID, academicYear)
+  }
 }
