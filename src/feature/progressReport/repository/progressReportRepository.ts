@@ -68,7 +68,7 @@ export class ProgressReportRepository {
             projectId,
           },
           orderBy: {
-            updatedAt: 'desc',
+            createAt: 'desc',
           },
           select: {
             id: true,
