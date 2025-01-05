@@ -63,9 +63,8 @@ export class ProjectRepository {
       return project
     })
   }
-
   static UpdateProject = async (projectData: UpdateProjectRequest) => {
-    return await prisma.$transaction(async (prisma) => {
+    const updateProject = await prisma.$transaction(async (prisma) => {
       const updatedProject = await prisma.project.update({
         where: { id: projectData.id },
         data: {
@@ -105,6 +104,7 @@ export class ProjectRepository {
           ...(projectData.examLocation !== undefined && {
             examLocation: projectData.examLocation,
           }),
+
           ...(projectData.students && {
             students: {
               deleteMany: {},
@@ -112,7 +112,9 @@ export class ProjectRepository {
                 (student: ProjectStudentRequest) => ({
                   student: {
                     connectOrCreate: {
-                      where: { studentId: student.studentId },
+                      where: {
+                        studentId: student.studentId,
+                      },
                       create: {
                         studentId: student.studentId,
                         name: student.name,
@@ -123,6 +125,7 @@ export class ProjectRepository {
               ),
             },
           }),
+
           ...(projectData.users && {
             users: {
               deleteMany: {
@@ -139,10 +142,26 @@ export class ProjectRepository {
         },
       })
 
+      if (projectData.students) {
+        await Promise.all(
+          projectData.students.map((student: ProjectStudentRequest) =>
+            prisma.student.update({
+              where: {
+                studentId: student.studentId,
+              },
+              data: {
+                name: student.name,
+              },
+            })
+          )
+        )
+      }
+
       return updatedProject
     })
-  }
 
+    return updateProject
+  }
   static UpdateProjects = async (projectData: UpdateProjectsRequest) => {
     const updateData = {
       ...(projectData.courseStatus !== undefined && {
