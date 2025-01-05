@@ -126,16 +126,43 @@ export class ProjectRepository {
             },
           }),
 
+          // ...(projectData.users && {
+          //   users: {
+          //     deleteMany: {
+          //       projectId: projectData.id,
+          //       userId: {
+          //         notIn: projectData.users.map((user) => user.userId),
+          //       },
+          //     },
+          //     create: projectData.users.map((user) => ({
+          //       user: { connect: { id: user.userId } },
+          //       userProjectRole: user.userProjectRole,
+          //     })),
+          //   },
+          // }),
+
           ...(projectData.users && {
             users: {
               deleteMany: {
-                userProjectRole: {
-                  not: userProjectRole.COMMITTEE,
+                projectId: projectData.id,
+                userId: {
+                  notIn: projectData.users.map((user) => user.userId),
                 },
               },
-              create: projectData.users.map((user) => ({
-                user: { connect: { id: user.userId } },
-                userProjectRole: user.userProjectRole,
+              upsert: projectData.users.map((user) => ({
+                where: {
+                  projectId_userId: {
+                    projectId: projectData.id,
+                    userId: user.userId,
+                  },
+                },
+                update: {
+                  userProjectRole: user.userProjectRole,
+                },
+                create: {
+                  user: { connect: { id: user.userId } },
+                  userProjectRole: user.userProjectRole,
+                },
               })),
             },
           }),
@@ -156,6 +183,23 @@ export class ProjectRepository {
           )
         )
       }
+      // if (projectData.users) {
+      //   await Promise.all(
+      //     projectData.users.map((user) =>
+      //       prisma.projectUser.update({
+      //         where: {
+      //           projectId_userId: {
+      //             projectId: projectData.id,
+      //             userId: user.userId,
+      //           },
+      //         },
+      //         data: {
+      //           userProjectRole: user.userProjectRole,
+      //         },
+      //       })
+      //     )
+      //   )
+      // }
 
       return updatedProject
     })
