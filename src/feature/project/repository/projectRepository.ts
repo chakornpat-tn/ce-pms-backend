@@ -126,21 +126,6 @@ export class ProjectRepository {
             },
           }),
 
-          // ...(projectData.users && {
-          //   users: {
-          //     deleteMany: {
-          //       projectId: projectData.id,
-          //       userId: {
-          //         notIn: projectData.users.map((user) => user.userId),
-          //       },
-          //     },
-          //     create: projectData.users.map((user) => ({
-          //       user: { connect: { id: user.userId } },
-          //       userProjectRole: user.userProjectRole,
-          //     })),
-          //   },
-          // }),
-
           ...(projectData.users && {
             users: {
               deleteMany: {
@@ -183,23 +168,6 @@ export class ProjectRepository {
           )
         )
       }
-      // if (projectData.users) {
-      //   await Promise.all(
-      //     projectData.users.map((user) =>
-      //       prisma.projectUser.update({
-      //         where: {
-      //           projectId_userId: {
-      //             projectId: projectData.id,
-      //             userId: user.userId,
-      //           },
-      //         },
-      //         data: {
-      //           userProjectRole: user.userProjectRole,
-      //         },
-      //       })
-      //     )
-      //   )
-      // }
 
       return updatedProject
     })
@@ -281,6 +249,9 @@ export class ProjectRepository {
           },
         },
         users: {
+          orderBy: {
+            userProjectRole: 'asc'
+          },
           select: {
             userProjectRole: true,
             user: {
