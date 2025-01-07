@@ -54,9 +54,9 @@ export type UpdateProjectRequest = {
   projectStatusId?: number | null
   courseStatus?: number
   students?: ProjectStudentRequest[]
+  examDateTime?: Date | null
+  examLocation?: string | null
   users?: ProjectUser[]
-  examDateTime: Date
-  examLocation?: string
 }
 
 export type UpdateProjectsRequest = {
@@ -67,6 +67,8 @@ export type UpdateProjectsRequest = {
   academicYear?: number
   projectSemester?: number
   projectAcademicYear?: number
+  examDateTime?: Date | null
+  examLocation?: string | null
   type?: string | null
 }
 

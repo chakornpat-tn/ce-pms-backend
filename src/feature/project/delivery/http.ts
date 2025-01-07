@@ -318,6 +318,8 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
         academicYear: t.Optional(t.Number()),
         projectSemester: t.Optional(t.Number()),
         projectAcademicYear: t.Optional(t.Number()),
+        examDateTime: t.Optional(t.Union([t.Date(), t.Null()])),
+        examLocation: t.Optional(t.Union([t.String(), t.Null()])),
         type: t.Optional(t.Union([t.String(), t.Null()])),
       }),
       detail: projectSwaggerDetail(

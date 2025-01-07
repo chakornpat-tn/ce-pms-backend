@@ -195,6 +195,12 @@ export class ProjectRepository {
         projectAcademicYear: projectData.projectAcademicYear,
       }),
       ...(projectData.type !== undefined && { type: projectData.type }),
+      ...(projectData.examDateTime !== undefined && {
+        examDateTime: projectData.examDateTime,
+      }),
+      ...(projectData.examLocation !== undefined && {
+        examLocation: projectData.examLocation,
+      })
     }
 
     return await prisma.project.updateMany({
