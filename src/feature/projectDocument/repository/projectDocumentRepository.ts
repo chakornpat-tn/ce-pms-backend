@@ -102,9 +102,16 @@ export class ProjectDocumentRepository {
         id: record.id,
       },
       data: {
-        documentName: projectDocument.documentName,
-        documentUrl: projectDocument.documentUrl,
-        status: projectDocument.status,
+        ...(projectDocument.documentName && {
+          documentName: projectDocument.documentName,
+        }),
+        ...(projectDocument.documentUrl && {
+          documentUrl: projectDocument.documentUrl,
+        }),
+        ...(projectDocument.advisorDocsUrl && {
+          advisorDocsUrl: projectDocument.advisorDocsUrl,
+        }),
+        ...(projectDocument.status && { status: projectDocument.status }),
       },
     })
   }

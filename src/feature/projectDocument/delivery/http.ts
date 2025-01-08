@@ -33,19 +33,18 @@ export const ProjectDocumentDelivery = new Elysia({
     '/wait-update/:userId',
     async ({ params, set }) => {
       try {
-       const userID = params.userId
-        const document = await projectDocumentUsecase.ListProjectDocsWaitUpdate(userID)
-        
+        const userID = params.userId
+        const document = await projectDocumentUsecase.ListProjectDocsWaitUpdate(
+          userID
+        )
+
         return utils.SuccessMessage(
           title,
           'List Project Document Waiting Update Success.',
           document
         )
       } catch (error) {
-        utils.logger.warn(
-          error,
-          'List Project Document Waiting Update Error.'
-        )
+        utils.logger.warn(error, 'List Project Document Waiting Update Error.')
         set.status = 500
         return utils.ErrorMessage(
           title,
@@ -55,7 +54,7 @@ export const ProjectDocumentDelivery = new Elysia({
     },
     {
       params: t.Object({
-        userId:t.Number()
+        userId: t.Number(),
       }),
       detail: ProjectDocumentSwaggerDetail(
         'List Project Document Waiting Update Success.',
@@ -290,10 +289,12 @@ export const ProjectDocumentDelivery = new Elysia({
     async ({ params, body, set }) => {
       let tempFilePath: string | null = null
       let url: string | null = null
+      let tempFilePath2: string | null = null
+      let url2: string | null = null
       const gcs = utils.GCS
       try {
         const req = body as ProjectDocumentRequest
-        const data = JSON.parse(req.data) as ProjectDocument
+        const data = req.data ? JSON.parse(req.data) as ProjectDocument : {} as ProjectDocument
 
         if (req.document) {
           if (!req.document.type.includes('pdf')) {
@@ -328,22 +329,50 @@ export const ProjectDocumentDelivery = new Elysia({
           await Bun.write(tempFilePath, req.document)
           url = await gcs.UploadFile(tempFilePath, destination)
 
-          if (existingDocs.documentUrl) {
-            await gcs.DeleteFile(existingDocs.documentUrl)
+          try {
+            if (existingDocs.documentUrl)
+              await gcs.DeleteFile(existingDocs.documentUrl)
+          } catch (error) {
+            console.log('Error deleting file:', error)
           }
+
           data.documentUrl = url
         }
 
+        if (req.advisorDocs) {
+          const timestamp = new Date()
+            .toISOString()
+            .replace(/[-:T]/g, '')
+            .slice(0, 12)
+          const destination = `${timestamp}-${params.id}-advisor-report.pdf`
+          tempFilePath2 = `tmp/${destination}`
+          await Bun.write(tempFilePath2, req.advisorDocs)
+          url2 = await gcs.UploadFile(tempFilePath2, destination)
+
+          try {
+            if (existingDocs.advisorDocsUrl)
+              await gcs.DeleteFile(existingDocs.advisorDocsUrl)
+          } catch (error) {
+            console.log('Error deleting file:', error)
+          }
+
+          data.advisorDocsUrl = url2
+        }
+
         data.id = params.id
+        
         await projectDocumentUsecase.UpdateProjectDocument(data)
 
         if (tempFilePath) await fs.rm(tempFilePath)
+        if (tempFilePath2) await fs.rm(tempFilePath2)
 
         return utils.SuccessMessage(title, 'Update project document success.')
       } catch (error) {
         if (tempFilePath) await fs.rm(tempFilePath)
+        if (tempFilePath2) await fs.rm(tempFilePath2)
 
         if (url) await gcs.DeleteFile(url)
+        if (url2) await gcs.DeleteFile(url2)
 
         utils.logger.warn(error, 'Update Project Document Controller Error')
         set.status = 500
@@ -361,10 +390,18 @@ export const ProjectDocumentDelivery = new Elysia({
             description: 'Project Exam PDF file to upload (max 25MB)',
           })
         ),
-        data: t.String({
-          description:
-            '{ documentName: string, documentUrl: string, status: number }',
-        }),
+        advisorDocs: t.Optional(
+          t.File({
+            type: ['application/pdf'],
+            description: 'Advisor Exam PDF file to upload (max 25MB)',
+          })
+        ),
+        data: t.Optional(
+          t.String({
+            description:
+              '{ documentName: string, documentUrl: string, status: number }',
+          })
+        ),
       }),
       detail: ProjectDocumentSwaggerDetail(
         'Update Project Document',

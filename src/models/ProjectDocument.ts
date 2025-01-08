@@ -11,6 +11,7 @@ type ProjectDocument = {
 
 export type ProjectDocumentRequest = {
   document: File
+  advisorDocs: File
   data: string
   commentIDs: string
 }
