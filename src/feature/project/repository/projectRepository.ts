@@ -352,10 +352,14 @@ export class ProjectRepository {
 
     return await prisma.project.findMany({
       where: whereConditions,
-      orderBy: {
-        updatedAt: 'desc',
-      },
-      select: selectFields,
+      orderBy: [
+        {
+          projectAcademicYear: 'asc',
+        },
+        {
+          updatedAt: 'desc',
+        }
+      ],      select: selectFields,
     })
   }
 

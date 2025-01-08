@@ -210,6 +210,7 @@ export class ProjectDocumentRepository {
         },
         document: {
           select: {
+            id: true,
             name: true,
           },
         },
