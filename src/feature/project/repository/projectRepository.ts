@@ -200,7 +200,7 @@ export class ProjectRepository {
       }),
       ...(projectData.examLocation !== undefined && {
         examLocation: projectData.examLocation,
-      })
+      }),
     }
 
     return await prisma.project.updateMany({
@@ -256,7 +256,7 @@ export class ProjectRepository {
         },
         users: {
           orderBy: {
-            userProjectRole: 'asc'
+            userProjectRole: 'asc',
           },
           select: {
             userProjectRole: true,
@@ -325,13 +325,15 @@ export class ProjectRepository {
         }),
       ...(academicYear && !projectAcademicYear && { academicYear }),
       ...(projectAcademicYear && !academicYear && { projectAcademicYear }),
+
+      ...(!academicYear && !projectAcademicYear && { take: 20 }),
     }
 
     const selectFields = {
       id: true,
       username: true,
       projectName: true,
-      abstract: true,
+      abstract: false,
       semester: true,
       academicYear: true,
       projectSemester: true,
@@ -358,8 +360,9 @@ export class ProjectRepository {
         },
         {
           updatedAt: 'desc',
-        }
-      ],      select: selectFields,
+        },
+      ],
+      select: selectFields,
     })
   }
 
@@ -390,5 +393,16 @@ export class ProjectRepository {
         }),
       },
     })
+  }
+
+  static async GetMaxProjectAcademicYear() {
+    const projectAcademicYear = await prisma.project.aggregate({
+      _max: {
+        academicYear: true,
+        projectAcademicYear: true,
+      },
+    })
+
+    return projectAcademicYear._max
   }
 }

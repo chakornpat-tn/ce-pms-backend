@@ -22,6 +22,37 @@ const projectSwaggerDetail = (summary: string, detail: string) => {
 }
 
 export const ProjectDelivery = new Elysia({ prefix: '/project' })
+  .get(
+    '/max-academic-year',
+    async () => {
+      try {
+        const projectAcademicYear = await projectUsecase.GetMaxProjectAcademicYear()
+        return utils.SuccessMessage(
+          title,
+          'ProjectController.GetMaxProjectAcademicYear successfully',
+          projectAcademicYear
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.GetMaxProjectAcademicYear Error'
+        )
+        return utils.ErrorMessage(
+          title,
+          'ProjectController.GetMaxProjectAcademicYear Error'
+        )
+      }
+    },
+    {
+      detail: {
+        ...projectSwaggerDetail(
+          'Get Max Project Academic Year',
+          'get max project academic year'
+        ),
+       
+      },
+    }
+  )
   .use(middleWare.JwtConfig)
   .use(bearer())
   // .guard({

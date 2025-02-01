@@ -63,4 +63,9 @@ export class ProjectUsecase {
   static ListProjectPassPre = async (req: ListProjectsFilter) => {
     return projectRepo.ListProjectPassPre(req)
   }
+
+  static GetMaxProjectAcademicYear = async () => {
+    return await projectRepo.GetMaxProjectAcademicYear()
+  }
+
 }
