@@ -112,6 +112,9 @@ export class ProjectDocumentRepository {
           advisorDocsUrl: projectDocument.advisorDocsUrl,
         }),
         ...(projectDocument.status && { status: projectDocument.status }),
+        ...(typeof projectDocument.releaseDocs === 'boolean' && {
+          releaseDocs: projectDocument.releaseDocs,
+        }),
       },
     })
   }
@@ -160,6 +163,32 @@ export class ProjectDocumentRepository {
     }
   }
 
+  static ListDocsApproveReleaseInProject = async (projectId: number) => {
+    const docs = await prisma.projectDocument.findMany({
+      distinct: ['documentId'],
+      where: {
+        projectId: projectId,
+        status: projectDocumentStatus.APPROVED,
+        releaseDocs: true,
+        document: {
+          course: course.Project,
+        },
+      },
+      include: {
+        document: {
+          select: {
+            course: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    })
+    return docs
+  }
+
   static ListLastDocsStatusInProject = async (
     projectId: number,
     projectCourse: number
@@ -179,6 +208,7 @@ export class ProjectDocumentRepository {
         documentId: true,
         documentName: true,
         status: true,
+        releaseDocs: true,
       },
     })
     return result

@@ -24,6 +24,48 @@ const ProjectDocumentSwaggerDetail = (summary: string, detail: string) => {
 export const ProjectDocumentDelivery = new Elysia({
   prefix: '/project-document',
 })
+  .get(
+    '/public-release/:projectId',
+    async ({ params, set }) => {
+      try {
+        const document =
+          await projectDocumentUsecase.ListDocsApproveReleaseInProject(
+            params.projectId
+          )
+        if (!document) {
+          set.status = 404
+          return utils.ErrorMessage(
+            title,
+            'List project document public release error.'
+          )
+        }
+        return utils.SuccessMessage(
+          title,
+          'list project document public release success.',
+          document
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error,
+          'Project Document Public Release Controller Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'List project document public release error.'
+        )
+      }
+    },
+    {
+      params: t.Object({
+        projectId: t.Number(),
+      }),
+      detail: ProjectDocumentSwaggerDetail(
+        'List Project Document Public Release',
+        'List project document public release by project id'
+      ),
+    }
+  )
   .use(middleWare.JwtConfig)
   .use(bearer())
   .guard({
@@ -147,6 +189,7 @@ export const ProjectDocumentDelivery = new Elysia({
       ),
     }
   )
+
   .post(
     '/',
     async ({ body, set }) => {
@@ -294,7 +337,9 @@ export const ProjectDocumentDelivery = new Elysia({
       const gcs = utils.GCS
       try {
         const req = body as ProjectDocumentRequest
-        const data = req.data ? JSON.parse(req.data) as ProjectDocument : {} as ProjectDocument
+        const data = req.data
+          ? (JSON.parse(req.data) as ProjectDocument)
+          : ({} as ProjectDocument)
 
         if (req.document) {
           if (!req.document.type.includes('pdf')) {
@@ -360,7 +405,7 @@ export const ProjectDocumentDelivery = new Elysia({
         }
 
         data.id = params.id
-        
+
         await projectDocumentUsecase.UpdateProjectDocument(data)
 
         if (tempFilePath) await fs.rm(tempFilePath)

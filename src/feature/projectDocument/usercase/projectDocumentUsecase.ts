@@ -40,4 +40,9 @@ export class ProjectDocumentUsecase {
   static ListProjectDocsWaitUpdate = async (userID:number) => {
     return await projectDocumentRepo.ListProjectDocsWaitUpdate(userID)
   }
+
+static ListDocsApproveReleaseInProject = async (projectId: number) => {
+    return await projectDocumentRepo.ListDocsApproveReleaseInProject(projectId)
+  }
+
 }
