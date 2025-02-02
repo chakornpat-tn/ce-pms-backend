@@ -325,8 +325,6 @@ export class ProjectRepository {
         }),
       ...(academicYear && !projectAcademicYear && { academicYear }),
       ...(projectAcademicYear && !academicYear && { projectAcademicYear }),
-
-      ...(!academicYear && !projectAcademicYear && { take: 20 }),
     }
 
     const selectFields = {
@@ -354,6 +352,7 @@ export class ProjectRepository {
 
     return await prisma.project.findMany({
       where: whereConditions,
+      ...(!academicYear && !projectAcademicYear && { take: 20 }),
       orderBy: [
         {
           projectAcademicYear: 'asc',
