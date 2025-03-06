@@ -109,6 +109,7 @@ model ProjectUser {
   userProjectRole Int     @map("user_project_role")
   prepPoint       Int?    @map("prep_point")
   projectPoint    Int?    @map("project_point")
+  committeeProject Boolean @default(true) @map("committee_project")
   project         Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
   user            User    @relation(fields: [userId], references: [id])
 
