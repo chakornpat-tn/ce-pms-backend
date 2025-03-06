@@ -215,9 +215,8 @@ export class ProjectDocumentRepository {
   }
 
   static ListProjectDocsWaitUpdate = async (userID: number) => {
-    const result = await prisma.projectDocument.findMany({
+    const res = await prisma.projectDocument.findMany({
       where: {
-        status: projectDocumentStatus.WAITING,
         project: {
           users: {
             some: {
@@ -227,6 +226,27 @@ export class ProjectDocumentRepository {
               },
             },
           },
+        },
+      },
+      select: {
+        id: true,
+        projectId: true,
+        documentId: true,
+        createdAt: true,
+      },
+      orderBy: [
+        { projectId: 'asc' }, 
+        { documentId: 'asc' }, 
+        { createdAt: 'desc' }, 
+      ],
+      distinct: ['projectId', 'documentId'], 
+    });
+
+    const result = await prisma.projectDocument.findMany({
+      where: {
+        status: projectDocumentStatus.WAITING,
+        id: {
+          in: res.map((item: { id: number }) => item.id)
         },
       },
       select: {
@@ -250,6 +270,9 @@ export class ProjectDocumentRepository {
         createdAt: 'asc',
       },
     })
+
     return result
-  }
+  }  
+
+  
 }
