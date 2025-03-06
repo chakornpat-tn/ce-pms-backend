@@ -48,6 +48,9 @@ model Project {
   users               ProjectUser[]     @relation("ProjectUser")
   projectStatus       ProjectStatus?    @relation(fields: [projectStatusId], references: [id])
 
+  @@index([academicYear, semester])
+  @@index([projectAcademicYear, projectSemester])
+  @@index([projectStatusId])
   @@map("projects")
 }
 
@@ -102,16 +105,16 @@ model ProjectStudent {
 }
 
 model ProjectUser {
-  projectId       Int     @map("project_id")
-  userId          Int     @map("user_id")
-  prepDocs        String? @map("prep_docs")
-  projectDocs     String? @map("project_docs")
-  userProjectRole Int     @map("user_project_role")
-  prepPoint       Int?    @map("prep_point")
-  projectPoint    Int?    @map("project_point")
+  projectId        Int     @map("project_id")
+  userId           Int     @map("user_id")
+  prepDocs         String? @map("prep_docs")
+  projectDocs      String? @map("project_docs")
+  userProjectRole  Int     @map("user_project_role")
+  prepPoint        Int?    @map("prep_point")
+  projectPoint     Int?    @map("project_point")
   committeeProject Boolean @default(true) @map("committee_project")
-  project         Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
-  user            User    @relation(fields: [userId], references: [id])
+  project          Project @relation("ProjectUser", fields: [projectId], references: [id], onDelete: Cascade)
+  user             User    @relation(fields: [userId], references: [id])
 
   @@id([projectId, userId])
   @@map("project_users")
@@ -133,6 +136,7 @@ model ProjectDocument {
   document          Document  @relation(fields: [documentId], references: [id], onDelete: NoAction)
   project           Project   @relation("ProjectDocument", fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@index([status])
   @@map("project_documents")
 }
 
@@ -164,5 +168,7 @@ model ProgressReport {
   projectId       Int      @map("project_id")
   project         Project  @relation("ProjectProgressReport", fields: [projectId], references: [id])
 
+  @@index([status])
+  @@index([createAt])
   @@map("progress_reports")
 }
