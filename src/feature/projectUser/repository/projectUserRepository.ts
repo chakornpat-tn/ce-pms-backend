@@ -104,7 +104,7 @@ export class ProjectUserRepository {
   }
 
   static GetProjectsWithIncompleteUsers = async (req: ListProjectsFilter) => {
-    const projectUserCounts = await prisma.projectUser.groupBy({
+    const projectUser = await prisma.projectUser.groupBy({
       by: ['projectId'],
       where: {
         project: {
@@ -125,6 +125,7 @@ export class ProjectUserRepository {
               in: req.courseStatus,
             },
           }),
+          examDateTime: null,
         },
       },
       _count: {
@@ -132,9 +133,7 @@ export class ProjectUserRepository {
       },
     })
 
-    const res = projectUserCounts.filter((item) => item._count.userId < 3)
-
-    return res
+    return projectUser
   }
   static GetProjectByIDs = async (projectIds: number[], userId: number) => {
     return prisma.project.findMany({
@@ -381,13 +380,22 @@ export class ProjectUserRepository {
     return examDateTime
   }
 
-  static CountProjectInYear = async (userID: number, academicYear: number) => {
+  static CountProjectInYear = async (
+    academicYear: number,
+    semester?: number
+  ) => {
     const projectCount = await prisma.project
       .findMany({
         where: {
           OR: [
-            { academicYear: academicYear },
-            { projectAcademicYear: academicYear },
+            {
+              projectAcademicYear: academicYear,
+              ...(semester && { projectSemester: semester }),
+            },
+            {
+              academicYear: academicYear,
+              ...(semester && { semester: semester }),
+            },
           ],
           users: {
             some: {

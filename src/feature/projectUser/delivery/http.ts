@@ -28,31 +28,36 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     beforeHandle: middleWare.checkAuthorization,
   })
   .get(
-    '/count-project/:userId/:academicYear',
-    async ({ params, set }) => {
+    '/count-project/:academicYear',
+    async ({ params,query, set }) => {
       try {
-        const userId = params.userId
         const academicYear = params.academicYear
+        const {semester} = query
         const projectCount = await projectUserUsecase.CountProjectInYear(
-          userId,
-          academicYear
+          academicYear,
+          semester
         )
         set.status = 200
         return utils.SuccessMessage(
           title,
-          `Count project In ${academicYear} success.`,
+          `Count project In ${semester && semester  + '/'}${academicYear} success.`,
           projectCount
         )
       } catch (error) {
         utils.logger.warn(error, 'Project User Count Project In Year Error')
         set.status = 500
-        return utils.ErrorMessage(title, 'Project User Count Project In Year Error.')
+        return utils.ErrorMessage(
+          title,
+          'Project User Count Project In Year Error.'
+        )
       }
     },
     {
       params: t.Object({
-        userId: t.Number(),
         academicYear: t.Number(),
+      }),
+      query: t.Object({
+        semester: t.Optional(t.Number()),
       }),
       detail: ProjectUserSwaggerDetail(
         'Count Project In Year',
