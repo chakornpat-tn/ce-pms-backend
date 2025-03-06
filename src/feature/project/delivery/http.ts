@@ -26,7 +26,8 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
     '/max-academic-year',
     async () => {
       try {
-        const projectAcademicYear = await projectUsecase.GetMaxProjectAcademicYear()
+        const projectAcademicYear =
+          await projectUsecase.GetMaxProjectAcademicYear()
         return utils.SuccessMessage(
           title,
           'ProjectController.GetMaxProjectAcademicYear successfully',
@@ -49,7 +50,6 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
           'Get Max Project Academic Year',
           'get max project academic year'
         ),
-       
       },
     }
   )
@@ -161,6 +161,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
             t.Object({
               userId: t.Number(),
               userProjectRole: t.Number(),
+              committeeProject: t.Optional(t.Boolean()),
             })
           )
         ),
@@ -317,6 +318,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
             t.Object({
               userId: t.Number(),
               userProjectRole: t.Number(),
+              committeeProject: t.Optional(t.Boolean()),
             })
           )
         ),

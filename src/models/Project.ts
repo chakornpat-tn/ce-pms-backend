@@ -98,4 +98,5 @@ export type ProjectUser = {
   userProjectRole: number
   projectDocs?: string
   prepDocs?: string
+  committeeProject?:boolean
 }

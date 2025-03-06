@@ -29,10 +29,10 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
   })
   .get(
     '/count-project/:academicYear',
-    async ({ params,query, set }) => {
+    async ({ params, query, set }) => {
       try {
         const academicYear = params.academicYear
-        const {semester} = query
+        const { semester } = query
         const projectCount = await projectUserUsecase.CountProjectInYear(
           academicYear,
           semester
@@ -40,7 +40,9 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
         set.status = 200
         return utils.SuccessMessage(
           title,
-          `Count project In ${semester && semester  + '/'}${academicYear} success.`,
+          `Count project In ${
+            semester && semester + '/'
+          }${academicYear} success.`,
           projectCount
         )
       } catch (error) {
@@ -529,11 +531,14 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
     '/detail',
     async ({ set, query }) => {
       try {
-        const userId = query.userId
-        const projectId = query.projectId
+        const { userId, projectId, committeeProject } = query
+        const committeeStatus = committeeProject
+          ? committeeProject === 'true'
+          : undefined
         const projectUser = await projectUserUsecase.GetProjectUserDetail(
           projectId,
-          userId
+          userId,
+          committeeStatus
         )
         set.status = 200
         return utils.SuccessMessage(
@@ -551,6 +556,9 @@ export const ProjectUserDelivery = new Elysia({ prefix: '/project-user' })
       query: t.Object({
         userId: t.Optional(t.Number()),
         projectId: t.Optional(t.Number()),
+        committeeProject: t.Optional(t.String({
+          detail: 'Committee project status. Use "true" or "false".',
+        })),
       }),
       detail: ProjectUserSwaggerDetail(
         'Get Project User Detail',

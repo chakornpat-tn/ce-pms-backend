@@ -55,6 +55,7 @@ export class ProjectRepository {
             create: projectData.users.map((user) => ({
               user: { connect: { id: user.userId } },
               userProjectRole: user.userProjectRole,
+              committeeProject: user.committeeProject,
             })),
           },
         },
@@ -143,10 +144,12 @@ export class ProjectRepository {
                 },
                 update: {
                   userProjectRole: user.userProjectRole,
+                  committeeProject: user.committeeProject,
                 },
                 create: {
                   user: { connect: { id: user.userId } },
                   userProjectRole: user.userProjectRole,
+                  committeeProject: user.committeeProject,
                 },
               })),
             },
@@ -260,6 +263,7 @@ export class ProjectRepository {
           },
           select: {
             userProjectRole: true,
+            committeeProject:true,
             user: {
               select: {
                 id: true,

@@ -311,11 +311,12 @@ export class ProjectUserRepository {
     return result
   }
 
-  static GetProjectUserDetail = async (projectId?: number, userId?: number) => {
+  static GetProjectUserDetail = async (projectId?: number, userId?: number, committeeProject?:boolean) => {
     const projectUser = await prisma.projectUser.findMany({
       where: {
         projectId,
         userId,
+        ...(committeeProject !== undefined ? { committeeProject } : {}),
       },
       include: {
         user: {
