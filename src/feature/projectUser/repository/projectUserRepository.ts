@@ -385,49 +385,27 @@ export class ProjectUserRepository {
     academicYear: number,
     semester?: number
   ) => {
-    const projectCount = await prisma.project
-      .findMany({
+    const [preProjectCount, projectCount] = await Promise.all([
+      prisma.project.count({
         where: {
-          OR: [
-            {
-              projectAcademicYear: academicYear,
-              ...(semester && { projectSemester: semester }),
-            },
-            {
-              academicYear: academicYear,
-              ...(semester && { semester: semester }),
-            },
-          ],
-          users: {
-            some: {
-              userProjectRole: {
-                in: [userProjectRole.ADVISOR, userProjectRole.CO_ADVISOR],
-              },
-            },
-          },
-        },
+          academicYear: academicYear,
+          ...(semester && { semester: semester }),
+          ...(!semester && {projectAcademicYear: null})
+        }
+      }),
+      prisma.project.count({
+        where: {
+          projectAcademicYear: academicYear,
+          ...(semester && { projectSemester: semester }),
+        }
       })
-      .then((projects) => ({
-        CountPreProp: projects.filter(
-          (p) =>
-            p.academicYear === academicYear &&
-            p.projectAcademicYear === null &&
-            p.courseStatus >= courseStatus.PreProject &&
-            p.courseStatus <= courseStatus.PassPre
-        ).length,
-        CountOnProject: projects.filter(
-          (p) =>
-            p.projectAcademicYear === academicYear &&
-            p.courseStatus >= courseStatus.Project &&
-            p.courseStatus <= courseStatus.Pass
-        ).length,
-        CountAllProject: projects.filter(
-          (p) =>
-            (p.projectAcademicYear === academicYear ||
-              p.academicYear === academicYear) &&
-            p.courseStatus !== courseStatus.Fail
-        ).length,
-      }))
-    return projectCount
+    ])
+    
+    const allProjectCount = preProjectCount + projectCount
+    return {
+      CountPreProp: preProjectCount,
+      CountOnProject: projectCount,
+      CountAllProject: allProjectCount,
+    }
   }
 }
