@@ -5,8 +5,9 @@ import {
   UpdateProjectRequest,
   ProjectStudentRequest,
   UpdateProjectsRequest,
+  ProjectCommitteePointRes,
 } from '@/models/Project'
-import userProjectRole from '@/statics/constants/userProjectRole/userProjectRole'
+import course from '@/statics/constants/course/course'
 import courseStatus from '@/statics/constants/course/courseStatus'
 
 const prisma = new PrismaClient()
@@ -263,7 +264,7 @@ export class ProjectRepository {
           },
           select: {
             userProjectRole: true,
-            committeeProject:true,
+            committeeProject: true,
             user: {
               select: {
                 id: true,
@@ -407,5 +408,74 @@ export class ProjectRepository {
     })
 
     return projectAcademicYear._max
+  }
+
+  static async GetProjectCommitteePoint(
+    academicYear: number,
+    semester: number,
+    courseSelect: number
+  ): Promise<ProjectCommitteePointRes[]> {
+    const project = await prisma.project.findMany({
+      where: {
+        ...(courseSelect === course.PreProject
+          ? {
+              semester: semester,
+              academicYear: academicYear,
+            }
+          : {
+              projectSemester: semester,
+              projectAcademicYear: academicYear,
+            }),
+        users: {
+          some: {
+            committeeProject: true,
+          },
+        },
+      },
+      select: {
+        id: true,
+        projectName: true,
+        students: {
+          select: {
+            student: {
+              select: {
+                id: true,
+                studentId: true,
+                name: true,
+              },
+              
+            },
+            
+          },
+          orderBy:{
+            student:{
+              studentId:'asc'
+            }
+          }
+        },
+        users: {
+          select: {
+            userProjectRole: true,
+            ...(courseSelect === course.PreProject
+              ? {
+                  prepPoint: true,
+                }
+              : {
+                  projectPoint: true,
+                }),
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+          orderBy:{
+            userProjectRole:'asc'
+          }
+        },
+      },
+    })
+    return project
   }
 }

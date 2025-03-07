@@ -22,6 +22,99 @@ const projectSwaggerDetail = (summary: string, detail: string) => {
 }
 
 export const ProjectDelivery = new Elysia({ prefix: '/project' })
+ .get(
+    '/',
+    async ({ query, set }) => {
+      try {
+        const filter: ListProjectsFilter = {
+          academicYear: query.academicYear,
+          semester: query.semester,
+          projectStatus: query.projectStatus
+            ? query.projectStatus.split(',').map(Number)
+            : undefined,
+          projectName: query.projectName || undefined,
+          courseStatus: query.courseStatus
+            ? query.courseStatus.split(',').map(Number)
+            : undefined,
+          projectAcademicYear: query.projectAcademicYear,
+          projectSemester: query.projectSemester,
+        }
+        const projects = await projectUsecase.ListProjects(filter)
+        return utils.SuccessMessage(
+          title,
+          'Projects retrieved successfully',
+          projects
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.ListProjects Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to retrieve projects')
+      }
+    },
+    {
+      query: t.Object({
+        academicYear: t.Optional(t.Number()),
+        semester: t.Optional(t.Number()),
+        projectStatus: t.Optional(t.String()),
+        projectName: t.Optional(t.String()),
+        courseStatus: t.Optional(t.String()),
+        projectSemester: t.Optional(t.Number()),
+        projectAcademicYear: t.Optional(t.Number()),
+      }),
+      detail: {
+        ...projectSwaggerDetail(
+          'List projects',
+          'Get a list of projects with optional filters'
+        ),
+        parameters: [
+          {
+            name: 'courseStatus, projectStatus',
+            in: 'query',
+            required: false,
+            description:
+              'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
+          },
+        ],
+      },
+    }
+  )
+  .get(
+    '/:id',
+    async ({ params, set }) => {
+      try {
+        const projectId = params.id
+        const project = await projectUsecase.GetProjectById(projectId)
+        if (!project) {
+          set.status = 404
+          return utils.NotFoundMessage(
+            'Project not found',
+            'The requested project does not exist'
+          )
+        }
+        return utils.SuccessMessage(
+          title,
+          'Project retrieved successfully',
+          project
+        )
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.GetProjectById Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(title, 'Failed to retrieve project')
+      }
+    },
+    {
+      params: t.Object({
+        id: t.Number(),
+      }),
+      detail: projectSwaggerDetail('Get project', 'Get project by ID'),
+    }
+  )
   .get(
     '/max-academic-year',
     async () => {
@@ -55,9 +148,44 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
   )
   .use(middleWare.JwtConfig)
   .use(bearer())
-  // .guard({
-  //   beforeHandle: middleWare.checkAuthorization,
-  // })
+  .guard({
+    beforeHandle: middleWare.checkAuthorization,
+  })
+  .get( '/committee-point',
+    async ({query, set}) => {
+      try {
+        const { academicYear, semester, course } = query     
+        const result = await projectUsecase.GetProjectCommitteePoint(academicYear, semester, course)
+        return utils.SuccessMessage(
+          title,
+          'ProjectController.committeePoint successfully',
+          result
+        )
+
+      } catch (error) {
+        utils.logger.warn(
+          error as Error,
+          'ProjectController.committeePoint Error'
+        )
+        set.status = 500
+        return utils.ErrorMessage(
+          title,
+          'ProjectController.committeePoint Error'
+        )
+        
+      }
+    }, {
+      query: t.Object({
+        academicYear: t.Number(),
+        semester: t.Number(),
+        course: t.Number(),
+      }),
+      detail: projectSwaggerDetail(
+        'Get All Project Committee Point',
+        'Get All Project Committee Point'
+      ),
+    }
+  )
   .get(
     '/pass-pre',
     async ({ query, set }) => {
@@ -173,99 +301,7 @@ export const ProjectDelivery = new Elysia({ prefix: '/project' })
       ),
     }
   )
-  .get(
-    '/',
-    async ({ query, set }) => {
-      try {
-        const filter: ListProjectsFilter = {
-          academicYear: query.academicYear,
-          semester: query.semester,
-          projectStatus: query.projectStatus
-            ? query.projectStatus.split(',').map(Number)
-            : undefined,
-          projectName: query.projectName || undefined,
-          courseStatus: query.courseStatus
-            ? query.courseStatus.split(',').map(Number)
-            : undefined,
-          projectAcademicYear: query.projectAcademicYear,
-          projectSemester: query.projectSemester,
-        }
-        const projects = await projectUsecase.ListProjects(filter)
-        return utils.SuccessMessage(
-          title,
-          'Projects retrieved successfully',
-          projects
-        )
-      } catch (error) {
-        utils.logger.warn(
-          error as Error,
-          'ProjectController.ListProjects Error'
-        )
-        set.status = 500
-        return utils.ErrorMessage(title, 'Failed to retrieve projects')
-      }
-    },
-    {
-      query: t.Object({
-        academicYear: t.Optional(t.Number()),
-        semester: t.Optional(t.Number()),
-        projectStatus: t.Optional(t.String()),
-        projectName: t.Optional(t.String()),
-        courseStatus: t.Optional(t.String()),
-        projectSemester: t.Optional(t.Number()),
-        projectAcademicYear: t.Optional(t.Number()),
-      }),
-      detail: {
-        ...projectSwaggerDetail(
-          'List projects',
-          'Get a list of projects with optional filters'
-        ),
-        parameters: [
-          {
-            name: 'courseStatus, projectStatus',
-            in: 'query',
-            required: false,
-            description:
-              'Array of course status IDs. Use comma to separate multiple IDs (e.g., 1,2).',
-          },
-        ],
-      },
-    }
-  )
-  .get(
-    '/:id',
-    async ({ params, set }) => {
-      try {
-        const projectId = params.id
-        const project = await projectUsecase.GetProjectById(projectId)
-        if (!project) {
-          set.status = 404
-          return utils.NotFoundMessage(
-            'Project not found',
-            'The requested project does not exist'
-          )
-        }
-        return utils.SuccessMessage(
-          title,
-          'Project retrieved successfully',
-          project
-        )
-      } catch (error) {
-        utils.logger.warn(
-          error as Error,
-          'ProjectController.GetProjectById Error'
-        )
-        set.status = 500
-        return utils.ErrorMessage(title, 'Failed to retrieve project')
-      }
-    },
-    {
-      params: t.Object({
-        id: t.Number(),
-      }),
-      detail: projectSwaggerDetail('Get project', 'Get project by ID'),
-    }
-  )
+ 
   .patch(
     '/:id',
     async ({ params, body, set }) => {

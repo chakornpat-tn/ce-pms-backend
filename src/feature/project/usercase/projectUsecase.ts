@@ -68,4 +68,10 @@ export class ProjectUsecase {
     return await projectRepo.GetMaxProjectAcademicYear()
   }
 
+  static GetProjectCommitteePoint = async(academicYear:number, semester:number, course:number) => {
+    const projects = await projectRepo.GetProjectCommitteePoint(academicYear, semester, course)
+    const res =  utils.TransformDataProjectForExcel(projects,course)
+    return res
+  }
+
 }

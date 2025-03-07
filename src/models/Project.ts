@@ -100,3 +100,28 @@ export type ProjectUser = {
   prepDocs?: string
   committeeProject?:boolean
 }
+
+export type ProjectCommitteePointRes = {
+  id: number
+  projectName: string
+  semester?: number
+  academicYear?: number
+  projectSemester?: number | null
+  projectAcademicYear?: number | null
+  students: {
+    student: {
+      id: number
+      studentId: string
+      name: string
+    }
+  }[]
+  users: {
+    userProjectRole: number
+    prepPoint?: number | null
+    projectPoint?: number | null
+    user: {
+      id: number
+      name: string | null
+    }
+  }[]
+}
