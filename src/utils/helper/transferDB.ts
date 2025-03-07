@@ -5,7 +5,7 @@ interface TransformedStudentProject {
   projectName: string;
   studentId: string;
   name: string;
-  committeePoint: (string | number | null)[]; 
+  [key:string] : string | number | null;
 }
 
 function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], courseSelect:number): TransformedStudentProject[] {
@@ -14,7 +14,7 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
   projects.forEach(project => {
     const projectName = project.projectName;
     
-    const projectPoints: { committeePoint: (string | number | null)[] } = {
+    const projectPoints: { [key: string]: (string | number | null)[] } = {
       committeePoint: []
     };
     
@@ -22,9 +22,15 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
       const pointValue = courseSelect === course.Project ? userObj.projectPoint : userObj.prepPoint;
       
       if (pointValue !== null && pointValue !== undefined) {
-        projectPoints.committeePoint[index] = pointValue;
+        if (!projectPoints['กรรมการ']) {
+          projectPoints['กรรมการ'] = [];
+        }
+        projectPoints['กรรมการ'][index] = pointValue;
       } else {
-        projectPoints.committeePoint[index] = userObj.user.name;
+        if (!projectPoints['กรรมการ']) {
+          projectPoints['กรรมการ'] = [];
+        }
+        projectPoints['กรรมการ'][index] = userObj.user.name;
       }
     });
     
@@ -35,8 +41,13 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
         projectName: projectName,
         studentId: student.studentId,
         name: student.name,
-        committeePoint: projectPoints.committeePoint
       };
+
+      if (projectPoints['กรรมการ']) {
+        projectPoints['กรรมการ'].forEach((point, index) => {
+          newObj[`กรรมการ${index + 1}`] = point;
+        });
+      }
       
       result.push(newObj);
     });
