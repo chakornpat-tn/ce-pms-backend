@@ -111,6 +111,9 @@ export class ProjectDocumentRepository {
         ...(projectDocument.advisorDocsUrl && {
           advisorDocsUrl: projectDocument.advisorDocsUrl,
         }),
+        ...(projectDocument.subjectTeacherDocs && {
+          subjectTeacherDocs: projectDocument.subjectTeacherDocs,
+        }),
         ...(projectDocument.status && { status: projectDocument.status }),
         ...(typeof projectDocument.releaseDocs === 'boolean' && {
           releaseDocs: projectDocument.releaseDocs,

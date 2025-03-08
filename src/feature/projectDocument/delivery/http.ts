@@ -335,19 +335,32 @@ export const ProjectDocumentDelivery = new Elysia({
       let tempFilePath2: string | null = null
       let url2: string | null = null
       const gcs = utils.GCS
+      let tempFilePath3: string | null = null
+      let url3: string | null = null
+
       try {
         const req = body as ProjectDocumentRequest
         const data = req.data
           ? (JSON.parse(req.data) as ProjectDocument)
           : ({} as ProjectDocument)
 
-        if (req.document) {
-          if (!req.document.type.includes('pdf')) {
+        if (req.document || req.advisorDocs || req.subjectTeacherDocs) {
+          if (
+            (req.document && !req.document.type.includes('pdf')) ||
+            (req.advisorDocs && !req.advisorDocs.type.includes('pdf')) ||
+            (req.subjectTeacherDocs &&
+              !req.subjectTeacherDocs.type.includes('pdf'))
+          ) {
             set.status = 400
             return utils.ErrorMessage(title, 'Only PDF files are allowed.')
           }
 
-          if (req.document.size > 25 * 1024 * 1024 && req.document) {
+          if (
+            (req.document && req.document.size > 25 * 1024 * 1024) ||
+            (req.advisorDocs && req.advisorDocs.size > 25 * 1024 * 1024) ||
+            (req.subjectTeacherDocs &&
+              req.subjectTeacherDocs.size > 25 * 1024 * 1024)
+          ) {
             set.status = 400
             return utils.ErrorMessage(
               title,
@@ -374,14 +387,13 @@ export const ProjectDocumentDelivery = new Elysia({
           await Bun.write(tempFilePath, req.document)
           url = await gcs.UploadFile(tempFilePath, destination)
 
-          try {
+          data.documentUrl = url
+           try {
             if (existingDocs.documentUrl)
               await gcs.DeleteFile(existingDocs.documentUrl)
           } catch (error) {
             console.log('Error deleting file:', error)
           }
-
-          data.documentUrl = url
         }
 
         if (req.advisorDocs) {
@@ -394,14 +406,34 @@ export const ProjectDocumentDelivery = new Elysia({
           await Bun.write(tempFilePath2, req.advisorDocs)
           url2 = await gcs.UploadFile(tempFilePath2, destination)
 
-          try {
+         
+          data.advisorDocsUrl = url2
+           try {
             if (existingDocs.advisorDocsUrl)
               await gcs.DeleteFile(existingDocs.advisorDocsUrl)
           } catch (error) {
             console.log('Error deleting file:', error)
           }
 
-          data.advisorDocsUrl = url2
+        }
+
+        if (req.subjectTeacherDocs) {
+          const timestamp = new Date()
+            .toISOString()
+            .replace(/[-:T]/g, '')
+            .slice(0, 12)
+          const destination = `${timestamp}-${params.id}-subject-teacher-report.pdf`
+          tempFilePath3 = `tmp/${destination}`
+          await Bun.write(tempFilePath3, req.subjectTeacherDocs)
+          url3 = await gcs.UploadFile(tempFilePath3, destination)
+
+          data.subjectTeacherDocs = url3
+          try {
+            if (existingDocs.subjectTeacherDocs)
+              await gcs.DeleteFile(existingDocs.subjectTeacherDocs)
+          } catch (error) {
+            console.log('Error deleting file:', error)
+          }
         }
 
         data.id = params.id
@@ -410,14 +442,17 @@ export const ProjectDocumentDelivery = new Elysia({
 
         if (tempFilePath) await fs.rm(tempFilePath)
         if (tempFilePath2) await fs.rm(tempFilePath2)
+        if (tempFilePath3) await fs.rm(tempFilePath3)
 
         return utils.SuccessMessage(title, 'Update project document success.')
       } catch (error) {
         if (tempFilePath) await fs.rm(tempFilePath)
         if (tempFilePath2) await fs.rm(tempFilePath2)
+        if (tempFilePath3) await fs.rm(tempFilePath3)
 
         if (url) await gcs.DeleteFile(url)
         if (url2) await gcs.DeleteFile(url2)
+        if (url3) await gcs.DeleteFile(url3)
 
         utils.logger.warn(error, 'Update Project Document Controller Error')
         set.status = 500
@@ -439,6 +474,12 @@ export const ProjectDocumentDelivery = new Elysia({
           t.File({
             type: ['application/pdf'],
             description: 'Advisor Exam PDF file to upload (max 25MB)',
+          })
+        ),
+        subjectTeacherDocs: t.Optional(
+          t.File({
+            type: ['application/pdf'],
+            description: 'Subject Teacher Exam PDF file to upload (max 25MB)',
           })
         ),
         data: t.Optional(

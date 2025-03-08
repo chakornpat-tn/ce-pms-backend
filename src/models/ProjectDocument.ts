@@ -12,6 +12,7 @@ type ProjectDocument = {
 export type ProjectDocumentRequest = {
   document: File
   advisorDocs: File
+  subjectTeacherDocs: File
   data: string
   commentIDs: string
 }
