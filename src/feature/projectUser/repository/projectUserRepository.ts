@@ -300,12 +300,13 @@ export class ProjectUserRepository {
     const projectUsersCount = await prisma.projectUser.count({
       where: {
         projectId: projectID,
+        committeeProject:true
       },
     })
 
     const result = {
       projectExamApprove: !!projectExists,
-      projectCommitteeCountApprove: projectUsersCount === 3,
+      projectCommitteeCountApprove: projectUsersCount >= 3,
     }
 
     return result
