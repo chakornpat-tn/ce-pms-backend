@@ -2,9 +2,9 @@ import { ProjectCommitteePointRes } from "@/models/Project";
 import course from "@/statics/constants/course/course";
 
 interface TransformedStudentProject {
-  projectName: string;
   studentId: string;
   name: string;
+  projectName: string;
   [key:string] : string | number | null;
 }
 
@@ -30,7 +30,8 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
         if (!projectPoints['กรรมการ']) {
           projectPoints['กรรมการ'] = [];
         }
-        projectPoints['กรรมการ'][index] = userObj.user.name;
+        // projectPoints['กรรมการ'][index] = userObj.user.name;
+        projectPoints['กรรมการ'][index] = 0;
       }
     });
     
@@ -38,9 +39,9 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
       const student = studentObj.student;
       
       const newObj: TransformedStudentProject = {
-        projectName: projectName,
         studentId: student.studentId,
         name: student.name,
+        projectName: projectName,
       };
 
       if (projectPoints['กรรมการ']) {
