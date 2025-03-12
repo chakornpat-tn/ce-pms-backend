@@ -46,7 +46,7 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
 
       if (projectPoints['กรรมการ']) {
         projectPoints['กรรมการ'].forEach((point, index) => {
-          newObj[`กรรมการ${index + 1}`] = point;
+          newObj[index === 0 ? 'ประธานกรรมการ' : `กรรมการ${index}`] = point;
         });
       }
       
@@ -56,5 +56,4 @@ function TransformDataProjectForExcel(projects: ProjectCommitteePointRes[], cour
   
   return result.sort((a, b) => a.studentId.localeCompare(b.studentId));
 }
-
 export { TransformDataProjectForExcel }

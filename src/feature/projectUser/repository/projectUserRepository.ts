@@ -327,6 +327,9 @@ export class ProjectUserRepository {
           },
         },
       },
+      orderBy:{
+        userProjectRole: 'asc',
+      }
     })
 
     return projectUser
